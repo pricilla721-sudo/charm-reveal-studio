@@ -51,14 +51,14 @@ function recolorFabric(src: CanvasImageSource, cfg: JacketConfig): THREE.CanvasT
     let target: [number, number, number] | null = null;
     let ref = lum;
 
-    if (b > r + 14 && b > g + 6 && lum < 120 && sat > 0.25) {
-      // royal-blue rib stripes
+    if (b > 100 && b > g + 40 && b > r + 40 && sat > 0.3) {
+      // royal-blue rib stripes (bright blue only — dark navy body must not match)
       target = trim;
-      ref = 72;
+      ref = 53;
     } else if (b > r + 6 && b > g && lum < 110) {
       // dark navy body panels
       target = body;
-      ref = 46;
+      ref = 40;
     } else if (sat < 0.12 && lum > 120 && lum < 235) {
       // heather grey sleeves
       target = sleeve;
@@ -73,11 +73,13 @@ function recolorFabric(src: CanvasImageSource, cfg: JacketConfig): THREE.CanvasT
     }
   }
   ctx.putImageData(img, 0, 0);
-
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
   t.flipY = false; // glTF UV convention
+  // model UVs wrap outside [0,1] — must repeat, not clamp
+  t.wrapS = THREE.RepeatWrapping;
+  t.wrapT = THREE.RepeatWrapping;
   return t;
 }
 
@@ -296,7 +298,15 @@ export default function Jacket3D({
   const inner = useRef<THREE.Group>(null);
 
   return (
-    <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0.1, 3.6], fov: 30 }} gl={{ antialias: true }}>
+    <Canvas
+      shadows
+      dpr={[1, 2]}
+      camera={{ position: [0, 0.1, 3.6], fov: 30 }}
+      gl={{ antialias: true }}
+      onCreated={(state) => {
+        (window as unknown as { __r3f?: unknown }).__r3f = state;
+      }}
+    >
       <color attach="background" args={["#F5F5F8"]} />
       <hemisphereLight args={["#eef2ff", "#b8b5ad", 0.4]} />
       <directionalLight

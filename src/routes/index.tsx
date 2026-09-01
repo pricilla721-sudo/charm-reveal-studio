@@ -36,7 +36,7 @@ const SCHOOL = {
   mascot: "Northstar",
   activity: "Football",
   closes: "October 15",
-  colors: { body: "#14295F", sleeve: "#EFE9DD", trim: "#CD171E" },
+  colors: { body: "#1B2A3B", sleeve: "#EFE9DD", trim: "#C9A227" },
 };
 
 const REP = {
