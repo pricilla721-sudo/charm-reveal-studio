@@ -858,9 +858,10 @@ function SizingChartScreen({ state, setState }: { state: OrderState; setState: R
           {SIZES.map((sz) => (
             <button
               key={sz}
-              onClick={() => setState((s) => ({ ...s, size, screen: "size-result" }))}
+              onClick={() => setState((s) => ({ ...s, size: sz, screen: "size-result" }))}
               className={`rounded-xl border px-4 py-6 text-center font-display text-lg font-semibold transition-colors ${
                 state.size === sz
+
                   ? "border-gold-deep bg-gold/10 text-navy"
                   : "border-border bg-card text-foreground hover:border-gold-deep"
               }`}
