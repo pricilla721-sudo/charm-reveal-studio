@@ -8,3 +8,5 @@
 - [x] Remove "How it works" section, nav link, hero CTA, and unused STEPS constant.
 
 - [x] 3D jacket realism pass: fabric weave normal maps, wool sheen material, cloth wrinkles/drape, seam + topstitch detail (user: "still looks cartoony")
+
+- [ ] Swap procedural 3D jacket for a real GLB model — blocked: needs a downloadable/licensed source (user-uploaded file or Sketchfab API token)
