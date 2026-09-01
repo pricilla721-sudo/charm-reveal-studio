@@ -22,7 +22,7 @@ export default function JacketViewer({ cfg, className }: { cfg: JacketConfig; cl
         ) : (
           <ViewerSkeleton />
         )}
-        <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-navy/70 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-navy-foreground">
+        <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-navy/70 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-navy-foreground">
           Drag to rotate
         </span>
       </div>
