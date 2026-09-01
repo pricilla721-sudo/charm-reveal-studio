@@ -53,6 +53,7 @@
   --color-gold-deep: var(--gold-deep);
   --color-gold-foreground: var(--gold-foreground);
   --color-brand-red: var(--brand-red);
+  --color-brand-red-bright: var(--brand-red-bright);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
 }
@@ -88,6 +89,7 @@
   --gold-deep: oklch(0.715 0.155 66);
   --gold-foreground: oklch(0.24 0.06 70);
   --brand-red: oklch(0.52 0.212 27.5);
+  --brand-red-bright: oklch(0.64 0.21 27.5);
   --ok: oklch(0.42 0.11 158);
   --ok-soft: oklch(0.95 0.04 158);
 
