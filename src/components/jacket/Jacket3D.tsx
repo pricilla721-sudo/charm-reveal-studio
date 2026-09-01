@@ -171,6 +171,11 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
     root.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
+      // hide the model's baked "shine" veil (an unlit translucent white shell)
+      if ((mesh.material as THREE.Material)?.type === "MeshBasicMaterial") {
+        mesh.visible = false;
+        return;
+      }
       mesh.castShadow = true;
       mesh.receiveShadow = false;
       const src = mesh.material as THREE.MeshStandardMaterial;
