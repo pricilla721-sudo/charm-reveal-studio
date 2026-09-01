@@ -484,6 +484,73 @@ function tubeGeometry(
 /* ============================================================
    parts
    ============================================================ */
+/** classic varsity stripe layout across a knit trim (base / accent bands) */
+const STRIPES: Array<[number, number, boolean]> = [
+  [0, 0.3, false],
+  [0.28, 0.42, true],
+  [0.4, 0.6, false],
+  [0.58, 0.72, true],
+  [0.7, 1, false],
+];
+
+function RibKnit({
+  keys,
+  steps = 30,
+  uSeg = 72,
+  trim,
+  accent,
+  ribMap,
+}: {
+  keys: Ring[];
+  steps?: number;
+  uSeg?: number;
+  trim: string;
+  accent: string;
+  ribMap: THREE.Texture;
+}) {
+  const segs = useMemo(() => {
+    const rings = profileRings(keys, steps);
+    return STRIPES.map(([a, b, acc]) => ({ g: loft(sliceRings(rings, a, b), uSeg, false, false), acc }));
+  }, [keys, steps, uSeg]);
+  return (
+    <>
+      {segs.map((s, i) => (
+        <mesh key={i} geometry={s.g} castShadow receiveShadow>
+          <meshPhysicalMaterial
+            color={s.acc ? accent : trim}
+            roughness={0.98}
+            normalMap={ribMap}
+            normalScale={new THREE.Vector2(1.5, 1.5)}
+            sheen={0.5}
+            sheenRoughness={0.85}
+            envMapIntensity={0.3}
+            side={THREE.FrontSide}
+          />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+/** thin stitched seam that follows the torso surface */
+function BodySeam({ u, color = "#0e1621" }: { u: number; color?: string }) {
+  const geo = useMemo(() => {
+    const rings = profileRings(BODY_KEYS, 60);
+    const pts = rings
+      .filter((_, i) => i % 2 === 0)
+      .map((r) => {
+        const [x, z] = ringPoint(u, r.rx * 1.002, r.rz * 1.002);
+        return new THREE.Vector3(x, r.y, z);
+      });
+    return tubeGeometry(pts, () => 0.0075, 40, 8);
+  }, [u]);
+  return (
+    <mesh geometry={geo}>
+      <meshStandardMaterial color={color} roughness={0.85} envMapIntensity={0.2} />
+    </mesh>
+  );
+}
+
 function Sleeve({
   side,
   color,
