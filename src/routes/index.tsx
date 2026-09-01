@@ -576,7 +576,7 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
             ["3", "Wear it", "Track it through production; delivered to " + SCHOOL.name + "."],
           ].map(([n, t, d]) => (
             <div key={n} className="card-elevated p-6">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-red font-display text-sm font-bold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-gold">
                 {n}
               </span>
               <h3 className="mt-4 text-lg">{t}</h3>
