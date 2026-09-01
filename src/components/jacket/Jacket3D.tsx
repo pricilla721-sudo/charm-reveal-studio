@@ -293,8 +293,8 @@ function patchGeometry(w: number, h: number, back: boolean, lift: number) {
       const b = a + 1;
       const c = a + row;
       const d = c + 1;
-      if (back) idx.push(a, b, c, b, d, c);
-      else idx.push(a, c, b, b, c, d);
+      if (back) idx.push(a, c, b, b, c, d);
+      else idx.push(a, b, c, b, d, c);
     }
   }
   const g = new THREE.BufferGeometry();
@@ -425,7 +425,7 @@ function Patch({
   const geo = useMemo(() => patchGeometry(size[0], size[1], !!back, 0.012), [size[0], size[1], back]);
   return (
     <mesh geometry={geo} position={[position[0], position[1], 0]} castShadow>
-      <meshStandardMaterial map={map} transparent roughness={0.9} side={THREE.DoubleSide} />
+      <meshStandardMaterial map={map} transparent roughness={0.9} side={THREE.FrontSide} />
     </mesh>
   );
 }
