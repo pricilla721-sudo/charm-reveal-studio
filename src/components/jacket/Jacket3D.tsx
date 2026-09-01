@@ -359,17 +359,25 @@ function profileRings(keys: Ring[], steps: number): Ring[] {
   return out;
 }
 
+/** contiguous slice of a ring list, by normalised range */
+function sliceRings(rings: Ring[], a: number, b: number): Ring[] {
+  const n = rings.length - 1;
+  const i0 = Math.max(0, Math.floor(a * n));
+  const i1 = Math.min(n, Math.ceil(b * n));
+  return rings.slice(i0, i1 + 1);
+}
+
 const BODY_KEYS: Ring[] = [
-  { y: -0.78, rx: 0.5, rz: 0.2 },
-  { y: -0.68, rx: 0.535, rz: 0.215 },
-  { y: -0.42, rx: 0.5, rz: 0.2 },
-  { y: -0.1, rx: 0.505, rz: 0.205 },
-  { y: 0.2, rx: 0.53, rz: 0.215 },
-  { y: 0.45, rx: 0.555, rz: 0.225 },
-  { y: 0.6, rx: 0.545, rz: 0.222 },
-  { y: 0.7, rx: 0.44, rz: 0.2 },
-  { y: 0.78, rx: 0.26, rz: 0.15 },
-  { y: 0.82, rx: 0.16, rz: 0.105 },
+  { y: -0.78, rx: 0.495, rz: 0.198 },
+  { y: -0.68, rx: 0.53, rz: 0.214 },
+  { y: -0.42, rx: 0.498, rz: 0.198 },
+  { y: -0.1, rx: 0.5, rz: 0.202 },
+  { y: 0.2, rx: 0.532, rz: 0.216 },
+  { y: 0.45, rx: 0.575, rz: 0.228 },
+  { y: 0.6, rx: 0.6, rz: 0.226 },
+  { y: 0.68, rx: 0.53, rz: 0.212 },
+  { y: 0.75, rx: 0.33, rz: 0.172 },
+  { y: 0.8, rx: 0.185, rz: 0.115 },
 ];
 
 /** soft cloth drape: vertical folds at the hem, pull under the arms, general slack */
@@ -476,10 +484,78 @@ function tubeGeometry(
 /* ============================================================
    parts
    ============================================================ */
+/** classic varsity stripe layout across a knit trim (base / accent bands) */
+const STRIPES: Array<[number, number, boolean]> = [
+  [0, 0.3, false],
+  [0.28, 0.52, true],
+  [0.5, 0.72, false],
+  [0.7, 0.86, true],
+  [0.84, 1, false],
+];
+
+function RibKnit({
+  keys,
+  steps = 30,
+  uSeg = 72,
+  trim,
+  accent,
+  ribMap,
+}: {
+  keys: Ring[];
+  steps?: number;
+  uSeg?: number;
+  trim: string;
+  accent: string;
+  ribMap: THREE.Texture;
+}) {
+  const segs = useMemo(() => {
+    const rings = profileRings(keys, steps);
+    return STRIPES.map(([a, b, acc]) => ({ g: loft(sliceRings(rings, a, b), uSeg, false, false), acc }));
+  }, [keys, steps, uSeg]);
+  return (
+    <>
+      {segs.map((s, i) => (
+        <mesh key={i} geometry={s.g} castShadow receiveShadow>
+          <meshPhysicalMaterial
+            color={s.acc ? accent : trim}
+            roughness={0.98}
+            normalMap={ribMap}
+            normalScale={new THREE.Vector2(1.5, 1.5)}
+            sheen={0.5}
+            sheenRoughness={0.85}
+            envMapIntensity={0.3}
+            side={THREE.FrontSide}
+          />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+/** thin stitched seam that follows the torso surface */
+function BodySeam({ u, color = "#0e1621" }: { u: number; color?: string }) {
+  const geo = useMemo(() => {
+    const rings = profileRings(BODY_KEYS, 60);
+    const pts = rings
+      .filter((_, i) => i % 2 === 0)
+      .map((r) => {
+        const [x, z] = ringPoint(u, r.rx * 1.002, r.rz * 1.002);
+        return new THREE.Vector3(x, r.y, z);
+      });
+    return tubeGeometry(pts, () => 0.0075, 40, 8);
+  }, [u]);
+  return (
+    <mesh geometry={geo}>
+      <meshStandardMaterial color={color} roughness={0.85} envMapIntensity={0.2} />
+    </mesh>
+  );
+}
+
 function Sleeve({
   side,
   color,
   trim,
+  accent,
   leather,
   bump,
   ribMap,
@@ -487,6 +563,7 @@ function Sleeve({
   side: 1 | -1;
   color: string;
   trim: string;
+  accent: string;
   leather: boolean;
   bump: THREE.Texture;
   ribMap: THREE.Texture;
@@ -495,32 +572,36 @@ function Sleeve({
     () =>
       tubeGeometry(
         [
-          new THREE.Vector3(side * 0.3, 0.62, 0),
-          new THREE.Vector3(side * 0.52, 0.44, 0.01),
-          new THREE.Vector3(side * 0.68, 0.14, 0.03),
-          new THREE.Vector3(side * 0.79, -0.18, 0.07),
-          new THREE.Vector3(side * 0.86, -0.5, 0.12),
+          new THREE.Vector3(side * 0.32, 0.6, 0),
+          new THREE.Vector3(side * 0.54, 0.42, 0.01),
+          new THREE.Vector3(side * 0.69, 0.12, 0.03),
+          new THREE.Vector3(side * 0.8, -0.2, 0.07),
+          new THREE.Vector3(side * 0.865, -0.5, 0.12),
         ],
-        (t) => 0.235 - 0.115 * Math.pow(t, 0.85),
+        (t) => 0.245 - 0.125 * Math.pow(t, 0.8),
         56,
         36,
         (u, t) => {
           const elbow = Math.max(0, 1 - Math.abs(t - 0.55) / 0.22);
-          return 0.02 * nz(u, t, 7, 5) + 0.03 * elbow * Math.sin(u * Math.PI * 2 * 5 + t * 9);
+          const pit = Math.max(0, 1 - t / 0.18);
+          return (
+            0.02 * nz(u, t, 7, 5) +
+            0.028 * elbow * Math.sin(u * Math.PI * 2 * 5 + t * 9) +
+            0.03 * pit * nz(u, t, 4, 3)
+          );
         },
       ),
     [side],
   );
-  const cuff = useMemo(
-    () =>
-      tubeGeometry(
-        [new THREE.Vector3(side * 0.855, -0.46, 0.115), new THREE.Vector3(side * 0.875, -0.62, 0.145)],
-        () => 0.125,
-        6,
-        24,
-      ),
-    [side],
-  );
+  /** cuff split into rib stripes along its axis */
+  const cuffs = useMemo(() => {
+    const a = new THREE.Vector3(side * 0.855, -0.455, 0.113);
+    const b = new THREE.Vector3(side * 0.885, -0.68, 0.158);
+    return STRIPES.map(([s, e, acc]) => ({
+      g: tubeGeometry([a.clone().lerp(b, s), a.clone().lerp(b, (s + e) / 2), a.clone().lerp(b, e)], () => 0.128, 4, 26),
+      acc,
+    }));
+  }, [side]);
   return (
     <group>
       <mesh geometry={geo} castShadow receiveShadow>
@@ -538,20 +619,23 @@ function Sleeve({
           side={THREE.FrontSide}
         />
       </mesh>
-      <mesh geometry={cuff} castShadow>
-        <meshPhysicalMaterial
-          color={trim}
-          roughness={0.98}
-          normalMap={ribMap}
-          normalScale={new THREE.Vector2(1.4, 1.4)}
-          sheen={0.5}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
+      {cuffs.map((c, i) => (
+        <mesh key={i} geometry={c.g} castShadow>
+          <meshPhysicalMaterial
+            color={c.acc ? accent : trim}
+            roughness={0.98}
+            normalMap={ribMap}
+            normalScale={new THREE.Vector2(1.4, 1.4)}
+            sheen={0.5}
+            envMapIntensity={0.3}
+            side={THREE.FrontSide}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
+
 
 function Patch({
   map,
@@ -594,40 +678,23 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
   const pocketGeo = useMemo(() => patchGeometry(0.26, 0.035, false, 0.008), []);
   const sleeveColor = cfg.leather ? "#7C5B41" : cfg.sleeveColor;
 
-  const collar = useMemo(
-    () =>
-      loft(
-        profileRings(
-          [
-            { y: 0.74, rx: 0.42, rz: 0.205 },
-            { y: 0.8, rx: 0.36, rz: 0.185 },
-            { y: 0.9, rx: 0.3, rz: 0.165 },
-          ],
-          12,
-        ),
-        60,
-        false,
-        false,
-      ),
+  const collarKeys = useMemo<Ring[]>(
+    () => [
+      { y: 0.72, rx: 0.44, rz: 0.208 },
+      { y: 0.79, rx: 0.37, rz: 0.188 },
+      { y: 0.89, rx: 0.305, rz: 0.168 },
+    ],
     [],
   );
-  const band = useMemo(
-    () =>
-      loft(
-        profileRings(
-          [
-            { y: -0.94, rx: 0.485, rz: 0.195 },
-            { y: -0.86, rx: 0.515, rz: 0.207 },
-            { y: -0.76, rx: 0.525, rz: 0.212 },
-          ],
-          12,
-        ),
-        60,
-        false,
-        false,
-      ),
+  const bandKeys = useMemo<Ring[]>(
+    () => [
+      { y: -1.0, rx: 0.475, rz: 0.19 },
+      { y: -0.9, rx: 0.515, rz: 0.207 },
+      { y: -0.76, rx: 0.528, rz: 0.213 },
+    ],
     [],
   );
+
 
   const letterMap = useMemo(
     () => (cfg.letter ? letterTexture(cfg.letterChar, cfg.bodyColor) : null),
@@ -667,31 +734,13 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
         />
       </mesh>
 
-      {/* ribbed knit collar + waistband */}
-      <mesh geometry={collar} castShadow>
-        <meshPhysicalMaterial
-          color={cfg.trimColor}
-          roughness={0.98}
-          normalMap={rib}
-          normalScale={new THREE.Vector2(1.5, 1.5)}
-          sheen={0.5}
-          sheenRoughness={0.85}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
-      <mesh geometry={band} castShadow>
-        <meshPhysicalMaterial
-          color={cfg.trimColor}
-          roughness={0.98}
-          normalMap={rib}
-          normalScale={new THREE.Vector2(1.5, 1.5)}
-          sheen={0.5}
-          sheenRoughness={0.85}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
+      {/* striped rib knit collar + waistband */}
+      <RibKnit keys={collarKeys} trim={cfg.trimColor} accent={cfg.bodyColor} ribMap={rib} />
+      <RibKnit keys={bandKeys} trim={cfg.trimColor} accent={cfg.bodyColor} ribMap={rib} />
+
+      {/* stitched side seams */}
+      <BodySeam u={0.0} />
+      <BodySeam u={0.5} />
 
       {/* snap placket + snaps, curved to the body */}
       <mesh geometry={placketGeo} position={[0, -0.02, 0]} castShadow>
@@ -707,7 +756,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       </mesh>
       {[0.56, 0.28, 0, -0.28, -0.56].map((y) => (
         <mesh key={y} position={[0, y, frontZ(0) + 0.024]}>
-          <sphereGeometry args={[0.026, 18, 12]} />
+          <sphereGeometry args={[0.024, 18, 12]} />
           <meshStandardMaterial color="#D9D3C5" roughness={0.25} metalness={0.9} />
         </mesh>
       ))}
@@ -715,12 +764,29 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       {/* welt pockets */}
       {[-1, 1].map((s) => (
         <mesh key={s} geometry={pocketGeo} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
-          <meshStandardMaterial color={cfg.bodyColor} roughness={0.55} envMapIntensity={0.5} side={THREE.FrontSide} />
+          <meshStandardMaterial color="#0e1621" roughness={0.7} envMapIntensity={0.3} side={THREE.FrontSide} />
         </mesh>
       ))}
 
-      <Sleeve side={-1} color={sleeveColor} trim={cfg.trimColor} leather={cfg.leather} bump={cfg.leather ? leatherTex : wool} ribMap={rib} />
-      <Sleeve side={1} color={sleeveColor} trim={cfg.trimColor} leather={cfg.leather} bump={cfg.leather ? leatherTex : wool} ribMap={rib} />
+      <Sleeve
+        side={-1}
+        color={sleeveColor}
+        trim={cfg.trimColor}
+        accent={cfg.bodyColor}
+        leather={cfg.leather}
+        bump={cfg.leather ? leatherTex : wool}
+        ribMap={rib}
+      />
+      <Sleeve
+        side={1}
+        color={sleeveColor}
+        trim={cfg.trimColor}
+        accent={cfg.bodyColor}
+        leather={cfg.leather}
+        bump={cfg.leather ? leatherTex : wool}
+        ribMap={rib}
+      />
+
 
       {/* front decoration */}
       {letterMap && <Patch normal={chenille} map={letterMap} size={[0.3, 0.375]} position={[-0.21, 0.3, 0]} />}
