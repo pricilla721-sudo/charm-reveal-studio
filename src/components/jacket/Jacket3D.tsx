@@ -435,6 +435,8 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
   const wool = useMemo(woolBump, []);
   const rib = useMemo(ribBump, []);
   const leatherTex = useMemo(leatherBump, []);
+  const placketGeo = useMemo(() => patchGeometry(0.1, 1.5, false, 0.006), []);
+  const pocketGeo = useMemo(() => patchGeometry(0.26, 0.035, false, 0.008), []);
   const sleeveColor = cfg.leather ? "#7C5B41" : cfg.sleeveColor;
 
   const collar = useMemo(
@@ -514,7 +516,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       </mesh>
 
       {/* snap placket + snaps, curved to the body */}
-      <mesh geometry={useMemo(() => patchGeometry(0.1, 1.5, false, 0.006), [])} position={[0, -0.02, 0]} castShadow>
+      <mesh geometry={placketGeo} position={[0, -0.02, 0]} castShadow>
         <meshStandardMaterial color={cfg.bodyColor} roughness={0.8} bumpMap={wool} bumpScale={0.06} side={THREE.DoubleSide} />
       </mesh>
       {[0.56, 0.28, 0, -0.28, -0.56].map((y) => (
@@ -526,7 +528,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
 
       {/* welt pockets */}
       {[-1, 1].map((s) => (
-        <mesh key={s} geometry={useMemo(() => patchGeometry(0.26, 0.035, false, 0.008), [])} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
+        <mesh key={s} geometry={pocketGeo} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
           <meshStandardMaterial color={cfg.bodyColor} roughness={0.7} side={THREE.DoubleSide} />
         </mesh>
       ))}
