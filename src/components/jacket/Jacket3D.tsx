@@ -137,9 +137,7 @@ const RAW_HEIGHT = 733; // model units, z-up
 const SCALE = 1.9 / RAW_HEIGHT;
 
 function GLBJacket({ cfg }: { cfg: JacketConfig }) {
-  console.log("[jacket] render start");
   const { scene } = useGLTF(MODEL_URL);
-  console.log("[jacket] gltf loaded, children:", scene.children.length);
 
   const fabric = useMemo(() => {
     let src: CanvasImageSource | null = null;
@@ -155,8 +153,6 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
 
   const model = useMemo(() => {
     const root = scene.clone(true);
-    const bbox = new THREE.Box3().setFromObject(root);
-    console.log("[jacket] bbox", JSON.stringify({ min: bbox.min, max: bbox.max, fabric: !!fabric }));
     root.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
