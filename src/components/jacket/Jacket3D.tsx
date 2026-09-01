@@ -88,6 +88,108 @@ function leatherBump() {
   );
 }
 
+
+/* ============================================================
+   procedural noise + normal maps (fabric realism)
+   ============================================================ */
+function hash2(x: number, y: number) {
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+/** value noise, seamless in u (period fx) */
+function nz(u: number, v: number, fx: number, fy: number) {
+  const x = u * fx;
+  const y = v * fy;
+  const xi = Math.floor(x);
+  const yi = Math.floor(y);
+  const xf = x - xi;
+  const yf = y - yi;
+  const sm = (t: number) => t * t * (3 - 2 * t);
+  const su = sm(xf);
+  const sv = sm(yf);
+  const wx = (i: number) => ((i % fx) + fx) % fx;
+  const a = hash2(wx(xi), yi);
+  const b = hash2(wx(xi + 1), yi);
+  const c = hash2(wx(xi), yi + 1);
+  const d = hash2(wx(xi + 1), yi + 1);
+  return (a * (1 - su) + b * su) * (1 - sv) + (c * (1 - su) + d * su) * sv - 0.5;
+}
+
+/** build a tangent-space normal map from a height field */
+function normalMap(height: (x: number, y: number) => number, size: number, repeat: [number, number], strength = 2.4) {
+  const h = new Float32Array(size * size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) h[y * size + x] = height(x / size, y / size);
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  const img = ctx.createImageData(size, size);
+  const at = (x: number, y: number) => h[(((y % size) + size) % size) * size + (((x % size) + size) % size)]!;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = (at(x + 1, y) - at(x - 1, y)) * strength;
+      const dy = (at(x, y + 1) - at(x, y - 1)) * strength;
+      const len = Math.sqrt(dx * dx + dy * dy + 1);
+      const i = (y * size + x) * 4;
+      img.data[i] = ((-dx / len) * 0.5 + 0.5) * 255;
+      img.data[i + 1] = ((-dy / len) * 0.5 + 0.5) * 255;
+      img.data[i + 2] = (1 / len) * 0.5 * 255 + 127;
+      img.data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(repeat[0], repeat[1]);
+  t.anisotropy = 8;
+  return t;
+}
+
+/** melton wool: twill weave + fibre fuzz */
+function woolNormal() {
+  return normalMap(
+    (x, y) => {
+      const twill = Math.sin((x * 34 + y * 34) * Math.PI) * 0.45;
+      const warp = Math.sin(x * 200 * Math.PI) * 0.18;
+      const weft = Math.sin(y * 200 * Math.PI) * 0.18;
+      const fuzz = (hash2(Math.floor(x * 512), Math.floor(y * 512)) - 0.5) * 0.5;
+      return twill + warp + weft + fuzz;
+    },
+    512,
+    [5, 5],
+    1.9,
+  );
+}
+
+/** ribbed knit for collar / cuffs / waistband */
+function ribNormal() {
+  return normalMap(
+    (x, y) => {
+      const rib = Math.cos(x * 46 * Math.PI) * 0.9;
+      const purl = Math.sin(y * 120 * Math.PI) * 0.12;
+      const fuzz = (hash2(Math.floor(x * 400), Math.floor(y * 400)) - 0.5) * 0.25;
+      return rib + purl + fuzz;
+    },
+    256,
+    [7, 2],
+    2.6,
+  );
+}
+
+/** pebbled leather grain */
+function leatherNormal() {
+  return normalMap(
+    (x, y) => nz(x, y, 40, 40) * 1.0 + nz(x, y, 90, 90) * 0.5 + nz(x, y, 180, 180) * 0.25,
+    512,
+    [3, 3],
+    3.2,
+  );
+}
+
+/** chenille loop texture for patches */
+function chenilleNormal() {
+  return normalMap((x, y) => nz(x, y, 70, 70) * 0.9 + nz(x, y, 160, 160) * 0.4, 256, [3, 3], 2.2);
+}
+
 /* ---------- patch artwork (chenille felt look) ---------- */
 const CHENILLE = "#F4EFE5";
 const STITCH = "#8C8271";
