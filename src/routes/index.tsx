@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import jacketCutout from "@/assets/jacket-cutout.png";
+import JacketViewer from "@/components/jacket/JacketViewer";
+import type { JacketConfig } from "@/components/jacket/config";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -278,120 +280,6 @@ function prevScreen(state: OrderState): Screen {
   return ORDER[idx - 1] || state.screen;
 }
 
-/* ---------------- jacket preview ---------------- */
-function JacketPreview({ state, view }: { state: OrderState; view: "front" | "back" }) {
-  const body = SCHOOL.colors.body;
-  const sleeve = state.sleeves === "leather" ? "#8A6A4F" : SCHOOL.colors.sleeve;
-  const trim = SCHOOL.colors.trim;
-
-  return (
-    <svg viewBox="0 0 400 480" className="mx-auto h-full w-full" aria-label={`${view === "back" ? "Back" : "Front"} jacket preview`}>
-      {/* body */}
-      <path d="M120 60 L280 60 L290 420 L110 420 Z" fill={body} />
-      {/* left sleeve */}
-      <path d="M120 70 L60 120 L40 280 L95 290 L130 180 Z" fill={sleeve} />
-      {/* right sleeve */}
-      <path d="M280 70 L340 120 L360 280 L305 290 L270 180 Z" fill={sleeve} />
-      {/* collar / trim */}
-      <path d="M120 60 Q200 20 280 60 L280 80 Q200 50 120 80 Z" fill={trim} />
-      {/* cuffs */}
-      <rect x="45" y="280" width="55" height="18" fill={trim} />
-      <rect x="300" y="280" width="55" height="18" fill={trim} />
-      {/* waistband */}
-      <rect x="110" y="410" width="180" height="22" fill={trim} />
-
-      {view === "front" ? (
-        <>
-          {/* award letter */}
-          {(state.letter === "make" || state.letter === "included") && (
-            <g>
-              <rect x="155" y="130" width="90" height="110" rx="8" fill="#F2EDE3" stroke="#7E7364" strokeWidth="2" />
-              <rect x="165" y="140" width="70" height="90" rx="4" fill="none" stroke={body} strokeWidth="5" />
-              <text x="200" y="210" fontSize="60" textAnchor="middle" fontFamily="Georgia,serif" fontWeight="700" fill={body}>
-                N
-              </text>
-            </g>
-          )}
-          {/* monogram */}
-          {state.mono && (
-            <text
-              x="200"
-              y="280"
-              fontSize="22"
-              textAnchor="middle"
-              fill={trim}
-              fontFamily={state.monoStyle.includes("Script") ? "Snell Roundhand, Brush Script MT, cursive" : "Georgia, serif"}
-              fontStyle={state.monoStyle.includes("Script") ? "italic" : "normal"}
-            >
-              {state.monoText || "Name"}
-            </text>
-          )}
-          {/* inserts */}
-          {state.inserts.map((_, i) => (
-            <g key={i}>
-              <rect x={55 + i * 6} y={300 + i * 50} width="52" height="34" rx="6" fill="#F2EDE3" stroke="#8C8271" strokeWidth="1.2" />
-              <text x={81 + i * 6} y={322 + i * 50} fontSize="12" textAnchor="middle" fill="#3B3227" fontFamily="Georgia,serif" fontWeight="700">
-                ACT
-              </text>
-            </g>
-          ))}
-          {/* year */}
-          {state.year && (
-            <g>
-              <rect x="305" y="300" width="50" height="34" rx="6" fill="#F2EDE3" stroke="#8C8271" strokeWidth="1.2" />
-              <text x="330" y="322" fontSize="14" textAnchor="middle" fill="#3B3227" fontFamily="Georgia,serif" fontWeight="700">
-                '{String(state.student.grad).slice(-2)}
-              </text>
-            </g>
-          )}
-          {/* mascot */}
-          {state.mascotPatch && (
-            <g>
-              <rect x="305" y="345" width="54" height="34" rx="6" fill="#F2EDE3" stroke="#8C8271" strokeWidth="1.2" />
-              <text x="332" y="367" fontSize="10" textAnchor="middle" fill="#3B3227" fontFamily="Georgia,serif" fontWeight="700">
-                MASCOT
-              </text>
-            </g>
-          )}
-          {/* number */}
-          {state.number && (
-            <g>
-              <rect x="307" y="390" width="50" height="34" rx="6" fill="#F2EDE3" stroke="#8C8271" strokeWidth="1.2" />
-              <text x="332" y="412" fontSize="14" textAnchor="middle" fill="#3B3227" fontFamily="Georgia,serif" fontWeight="700">
-                {state.numberVal || "##"}
-              </text>
-            </g>
-          )}
-        </>
-      ) : (
-        <>
-          {state.backName && (
-            <>
-              <text
-                x="200"
-                y="220"
-                fontSize="34"
-                textAnchor="middle"
-                fill={trim}
-                fontFamily={state.backNameStyle === "Script" ? "Snell Roundhand, Brush Script MT, cursive" : "Georgia, serif"}
-                fontStyle={state.backNameStyle === "Script" ? "italic" : "normal"}
-                fontWeight="600"
-              >
-                {state.backNameL1 || "Last Name"}
-              </text>
-              {state.backNameL2 && (
-                <text x="200" y="260" fontSize="20" textAnchor="middle" fill={trim} fontFamily="Georgia,serif">
-                  {state.backNameL2}
-                </text>
-              )}
-            </>
-          )}
-        </>
-      )}
-    </svg>
-  );
-}
-
 /* ---------------- shared chrome ---------------- */
 function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
   return (
@@ -479,27 +367,32 @@ function PriceRail({ state }: { state: OrderState }) {
   );
 }
 
+function jacketConfig(state: OrderState): JacketConfig {
+  return {
+    bodyColor: SCHOOL.colors.body,
+    sleeveColor: SCHOOL.colors.sleeve,
+    trimColor: SCHOOL.colors.trim,
+    leather: state.sleeves === "leather",
+    letter: state.letter === "make" || state.letter === "included",
+    letterChar: SCHOOL.initials.charAt(0),
+    mono: state.mono,
+    monoText: state.monoText || "Name",
+    monoScript: state.monoStyle.includes("Script"),
+    inserts: state.inserts.length,
+    year: state.year ? "'" + String(state.student.grad).slice(-2) : null,
+    mascot: state.mascotPatch,
+    number: state.number ? state.numberVal || "##" : null,
+    backName: state.backName,
+    backLine1: state.backNameL1 || "Last Name",
+    backLine2: state.backNameL2 || "",
+    backScript: state.backNameStyle === "Script",
+  };
+}
+
 function MobilePreview({ state }: { state: OrderState }) {
-  const [view, setView] = useState<"front" | "back">("front");
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="mx-auto h-56 w-48">
-        <JacketPreview state={state} view={view} />
-      </div>
-      <div className="mt-3 flex justify-center gap-2" role="group" aria-label="Jacket view">
-        <button
-          onClick={() => setView("front")}
-          className={`rounded-md px-3 py-1 text-xs font-semibold ${view === "front" ? "bg-navy text-navy-foreground" : "bg-muted text-muted-foreground"}`}
-        >
-          Front
-        </button>
-        <button
-          onClick={() => setView("back")}
-          className={`rounded-md px-3 py-1 text-xs font-semibold ${view === "back" ? "bg-navy text-navy-foreground" : "bg-muted text-muted-foreground"}`}
-        >
-          Back
-        </button>
-      </div>
+      <JacketViewer cfg={jacketConfig(state)} />
     </div>
   );
 }
