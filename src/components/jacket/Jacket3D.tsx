@@ -88,7 +88,7 @@ function scriptTexture(lines: string[], color: string, script: boolean) {
 
 /* ---------- geometry ---------- */
 const DEPTH = 0.42;
-const FRONT = DEPTH / 2 + 0.012;
+const FRONT = DEPTH / 2 + 0.082;
 const BACK = -FRONT;
 
 function useTorsoGeometry() {
@@ -120,7 +120,7 @@ function useTorsoGeometry() {
 function Sleeve({ side, color, trim, leather }: { side: 1 | -1; color: string; trim: string; leather: boolean }) {
   const len = 1.02;
   return (
-    <group position={[side * 0.47, 0.55, 0]} rotation={[0, 0, side * -0.3]}>
+    <group position={[side * 0.55, 0.5, 0]} rotation={[0, 0, side * -0.32]}>
       <mesh position={[0, -len / 2, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.2, 0.115, len, 28, 1, false]} />
         <meshStandardMaterial
@@ -248,7 +248,7 @@ export default function Jacket3D({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.15, 3.2], fov: 34 }}
+      camera={{ position: [0, 0.12, 4.6], fov: 30 }}
       gl={{ antialias: true }}
     >
       <color attach="background" args={["#F5F5F8"]} />
@@ -277,8 +277,8 @@ export default function Jacket3D({
       <ContactShadows position={[0, -1.02, 0]} opacity={0.32} scale={5} blur={2.6} far={2} />
       <OrbitControls
         enablePan={false}
-        minDistance={2.1}
-        maxDistance={5}
+        minDistance={3}
+        maxDistance={7}
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={Math.PI / 1.7}
         target={[0, 0, 0]}

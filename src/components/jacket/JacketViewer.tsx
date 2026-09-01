@@ -14,7 +14,7 @@ export default function JacketViewer({ cfg, className }: { cfg: JacketConfig; cl
 
   return (
     <div className={className}>
-      <div className="relative h-64 w-full overflow-hidden rounded-xl bg-[#F5F5F8]">
+      <div className="relative h-72 w-full overflow-hidden rounded-xl bg-[#F5F5F8]">
         {mounted ? (
           <Suspense fallback={<ViewerSkeleton />}>
             <Jacket3D cfg={cfg} spin={view === "spin"} targetY={targetY} />
