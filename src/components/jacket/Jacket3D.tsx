@@ -283,7 +283,7 @@ function patchGeometry(w: number, h: number, back: boolean, lift: number) {
       const px = (i / seg - 0.5) * w;
       const z = frontZ(px) + lift;
       pos.push(px, py, back ? -z : z);
-      uv.push(back ? i / seg : 1 - i / seg, j / seg);
+      uv.push(back ? 1 - i / seg : i / seg, j / seg);
     }
   }
   const row = seg + 1;
