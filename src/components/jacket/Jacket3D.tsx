@@ -678,40 +678,23 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
   const pocketGeo = useMemo(() => patchGeometry(0.26, 0.035, false, 0.008), []);
   const sleeveColor = cfg.leather ? "#7C5B41" : cfg.sleeveColor;
 
-  const collar = useMemo(
-    () =>
-      loft(
-        profileRings(
-          [
-            { y: 0.74, rx: 0.42, rz: 0.205 },
-            { y: 0.8, rx: 0.36, rz: 0.185 },
-            { y: 0.9, rx: 0.3, rz: 0.165 },
-          ],
-          12,
-        ),
-        60,
-        false,
-        false,
-      ),
+  const collarKeys = useMemo<Ring[]>(
+    () => [
+      { y: 0.72, rx: 0.44, rz: 0.208 },
+      { y: 0.79, rx: 0.37, rz: 0.188 },
+      { y: 0.89, rx: 0.305, rz: 0.168 },
+    ],
     [],
   );
-  const band = useMemo(
-    () =>
-      loft(
-        profileRings(
-          [
-            { y: -0.94, rx: 0.485, rz: 0.195 },
-            { y: -0.86, rx: 0.515, rz: 0.207 },
-            { y: -0.76, rx: 0.525, rz: 0.212 },
-          ],
-          12,
-        ),
-        60,
-        false,
-        false,
-      ),
+  const bandKeys = useMemo<Ring[]>(
+    () => [
+      { y: -0.94, rx: 0.485, rz: 0.195 },
+      { y: -0.86, rx: 0.515, rz: 0.207 },
+      { y: -0.76, rx: 0.525, rz: 0.212 },
+    ],
     [],
   );
+
 
   const letterMap = useMemo(
     () => (cfg.letter ? letterTexture(cfg.letterChar, cfg.bodyColor) : null),
