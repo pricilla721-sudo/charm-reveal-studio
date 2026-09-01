@@ -296,3 +296,12 @@
 }
 
 
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-14px) rotate(-3deg); }
+}
+
+@utility float-anim {
+  animation: float-y 6s ease-in-out infinite;
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import heroJacket from "@/assets/hero-jacket.jpg";
+import jacketCutout from "@/assets/jacket-cutout.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -554,15 +554,15 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
           </div>
           <div className="relative">
             <div
-              className="absolute -inset-8 -z-10 rounded-full opacity-40 blur-3xl"
-              style={{ background: "var(--gradient-gold)", opacity: 0.14 }}
+              className="absolute left-1/2 top-1/2 -z-0 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+              style={{ background: "var(--gradient-gold)", opacity: 0.16 }}
             />
             <img
-              src={heroJacket}
-              width={1280}
-              height={1600}
-              alt="Maroon and bone letter jacket with a chenille chest letter and gold sleeve patch"
-              className="mx-auto w-full max-w-md rounded-2xl shadow-[var(--shadow-lift)]"
+              src={jacketCutout}
+              width={1024}
+              height={1408}
+              alt="Navy and bone letter jacket with a gold chenille chest letter"
+              className="float-anim relative mx-auto w-full max-w-lg -rotate-3 drop-shadow-[0_40px_60px_oklch(0.1_0.04_268_/_0.55)] md:-mr-10 md:scale-110"
             />
           </div>
         </div>
