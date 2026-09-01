@@ -9,4 +9,5 @@
 
 - [x] 3D jacket realism pass: fabric weave normal maps, wool sheen material, cloth wrinkles/drape, seam + topstitch detail (user: "still looks cartoony")
 
-- [ ] Swap procedural 3D jacket for a real GLB model — blocked: needs a downloadable/licensed source (user-uploaded file or Sketchfab API token)
+- [x] Keep procedural jacket (user chose option 3): striped rib knit collar/cuffs/waistband, broader shoulders + tapered waist silhouette, stitched side seams, darker welt pockets
+- [ ] (deferred) Swap procedural 3D jacket for a real GLB model — blocked: needs a downloadable/licensed source (user-uploaded file or Sketchfab API token)
