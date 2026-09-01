@@ -397,7 +397,7 @@ function AppBar({ sub }: { sub?: string }) {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-navy-foreground">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-navy-foreground ring-2 ring-brand-red">
           {SCHOOL.initials}
         </div>
         <div className="flex-1">
@@ -519,14 +519,14 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 md:grid-cols-[1.05fr_.95fr] md:py-28">
           <div>
             <p className="eyebrow text-gold">
-              Class of {state.student.grad} · {SCHOOL.activity}
+              Class of {state.student.grad} <span className="text-brand-red-bright">· {SCHOOL.activity}</span>
             </p>
             <h1 className="mt-5 text-5xl sm:text-6xl lg:text-7xl">
               Wear what
               <br />
               you <span className="text-gold-gradient">earned.</span>
             </h1>
-            <div className="rule-gold mt-8 h-px w-24" />
+            <div className="rule-red mt-8 h-px w-24" />
             <p className="mt-7 max-w-lg text-base leading-relaxed text-navy-foreground/75">
               Build your {SCHOOL.mascot} jacket on screen. Every patch, every letter, exactly where you want it — with the price in front of you the whole way.
             </p>
@@ -576,7 +576,7 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
             ["3", "Wear it", "Track it through production; delivered to " + SCHOOL.name + "."],
           ].map(([n, t, d]) => (
             <div key={n} className="card-elevated p-6">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-navy-foreground">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-red font-display text-sm font-bold text-white">
                 {n}
               </span>
               <h3 className="mt-4 text-lg">{t}</h3>
@@ -678,7 +678,7 @@ function PackageScreen({ state, setState }: { state: OrderState; setState: React
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 lg:grid-cols-[1fr_22rem]">
           <div>
-            <p className="eyebrow text-muted-foreground">Packages</p>
+            <p className="eyebrow text-brand-red">Packages</p>
             <h2 className="mt-4 text-4xl sm:text-5xl">Pick a package</h2>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
               {REP.name} offers these for {SCHOOL.name}. Each one is a set price — you can still change colours, size and lettering, and add anything extra you want.
@@ -881,7 +881,7 @@ function SizeResultScreen({ state, setState }: { state: OrderState; setState: Re
     <main className="min-h-screen pb-24">
       <AppBar sub="Step 3 of 4 — your size" />
       <div className="mx-auto max-w-2xl px-6 py-12 text-center">
-        <p className="eyebrow text-muted-foreground">Recommended size</p>
+        <p className="eyebrow text-brand-red">Recommended size</p>
         <h2 className="mt-4 text-6xl sm:text-7xl">{state.size || "L"}</h2>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
           Based on your {state.sizingMethod === "photo" ? "photo" : state.sizingMethod === "quiz" ? "questionnaire" : "selection"}. You can change it below if you already know your size.
