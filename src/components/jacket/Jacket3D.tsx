@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -129,6 +129,19 @@ function scriptTexture(lines: string[], color: string) {
   }, 512, 256);
 }
 
+/* plane geometry gently bent around a chest radius so patches hug the body */
+function bentPlane(w: number, h: number, radius: number): THREE.PlaneGeometry {
+  const g = new THREE.PlaneGeometry(w, h, 16, 1);
+  const pos = g.attributes["position"] as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const ax = Math.min(Math.abs(x), radius * 0.95);
+    pos.setZ(i, -(radius - Math.sqrt(radius * radius - ax * ax)));
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
 /* ============================================================
    GLB jacket model
    ============================================================ */
@@ -173,6 +186,39 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
     return root;
   }, [scene, fabric, cfg.trimColor]);
 
+  /* anchor patches to the actual jacket surface via raycast, so they sit
+     on the fabric (angled with it) instead of floating on a flat plane */
+  const groupRef = useRef<THREE.Group>(null);
+  type Anchor = { pos: [number, number, number]; quat: THREE.Quaternion };
+  const [anchors, setAnchors] = useState<{ letter: Anchor | null; mono: Anchor | null; backName: Anchor | null }>({
+    letter: null,
+    mono: null,
+    backName: null,
+  });
+
+  useEffect(() => {
+    const g = groupRef.current;
+    if (!g) return;
+    g.updateWorldMatrix(true, true);
+    const gQuatInv = g.getWorldQuaternion(new THREE.Quaternion()).invert();
+    const ray = new THREE.Raycaster();
+    const find = (x: number, y: number, front: boolean): Anchor | null => {
+      ray.set(new THREE.Vector3(x, y + 0.06, front ? 3 : -3), new THREE.Vector3(0, 0, front ? -1 : 1));
+      const hit = ray.intersectObject(model, true)[0];
+      if (!hit || !hit.face) return null;
+      const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
+      const worldQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+      const worldPos = hit.point.clone().addScaledVector(n, 0.003);
+      const local = g.worldToLocal(worldPos);
+      return { pos: [local.x, local.y, local.z], quat: gQuatInv.clone().multiply(worldQuat) };
+    };
+    setAnchors({
+      letter: find(-0.24, 0.28, true),
+      mono: find(0.25, 0.3, true),
+      backName: find(0, 0.3, false),
+    });
+  }, [model]);
+
   const letter = useMemo(
     () => (cfg.letter ? letterTexture(cfg.letterChar || "N", cfg.bodyColor) : null),
     [cfg.letter, cfg.letterChar, cfg.bodyColor],
@@ -189,30 +235,46 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
     [cfg.backName, cfg.backLine1, cfg.backLine2],
   );
 
+  const letterGeo = useMemo(() => bentPlane(0.26, 0.32, 0.3), []);
+  const monoGeo = useMemo(() => bentPlane(0.3, 0.15, 0.28), []);
+  const backGeo = useMemo(() => bentPlane(0.7, 0.35, 0.5), []);
+
   return (
-    <group position={[0, 0.06, 0]}>
+    <group ref={groupRef} position={[0, 0.06, 0]}>
       {/* GLB root already converts z-up -> y-up; just center + scale */}
       <group scale={SCALE}>
         <primitive object={model} position={[0, -1227, -20]} />
       </group>
 
-      {/* front decorations (tuned against the GLB silhouette) */}
+      {/* decorations anchored to the jacket surface (raycast), hugging the fabric */}
       {letter && (
-        <mesh position={[-0.24, 0.28, 0.335]} rotation-y={0.18}>
-          <planeGeometry args={[0.26, 0.32]} />
-          <meshStandardMaterial map={letter} transparent roughness={0.9} />
+        <mesh
+          geometry={letterGeo}
+          {...(anchors.letter
+            ? { position: anchors.letter.pos, quaternion: anchors.letter.quat }
+            : { position: [-0.24, 0.28, 0.3] as [number, number, number], "rotation-y": 0.18 })}
+        >
+          <meshStandardMaterial map={letter} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       )}
       {mono && (
-        <mesh position={[0.25, 0.3, 0.335]} rotation-y={-0.18}>
-          <planeGeometry args={[0.3, 0.15]} />
-          <meshStandardMaterial map={mono} transparent roughness={0.9} />
+        <mesh
+          geometry={monoGeo}
+          {...(anchors.mono
+            ? { position: anchors.mono.pos, quaternion: anchors.mono.quat }
+            : { position: [0.25, 0.3, 0.3] as [number, number, number], "rotation-y": -0.18 })}
+        >
+          <meshStandardMaterial map={mono} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       )}
       {backName && (
-        <mesh position={[0, 0.3, -0.35]} rotation-y={Math.PI}>
-          <planeGeometry args={[0.7, 0.35]} />
-          <meshStandardMaterial map={backName} transparent roughness={0.9} />
+        <mesh
+          geometry={backGeo}
+          {...(anchors.backName
+            ? { position: anchors.backName.pos, quaternion: anchors.backName.quat }
+            : { position: [0, 0.3, -0.32] as [number, number, number], "rotation-y": Math.PI })}
+        >
+          <meshStandardMaterial map={backName} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       )}
     </group>
