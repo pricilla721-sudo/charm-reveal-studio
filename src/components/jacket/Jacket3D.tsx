@@ -120,7 +120,7 @@ function useTorsoGeometry() {
 function Sleeve({ side, color, trim, leather }: { side: 1 | -1; color: string; trim: string; leather: boolean }) {
   const len = 1.02;
   return (
-    <group position={[side * 0.55, 0.5, 0]} rotation={[0, 0, side * -0.32]}>
+    <group position={[side * 0.5, 0.52, 0]} rotation={[0, 0, side * 0.34]}>
       <mesh position={[0, -len / 2, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.2, 0.115, len, 28, 1, false]} />
         <meshStandardMaterial
