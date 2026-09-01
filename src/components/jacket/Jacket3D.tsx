@@ -77,11 +77,11 @@ function scriptTexture(lines: string[], color: string, script: boolean) {
     ctx.textBaseline = "middle";
     ctx.font = `${script ? "italic " : ""}700 ${lines.length > 1 ? 88 : 110}px Georgia, serif`;
     if (lines.length > 1) {
-      ctx.fillText(lines[0], w / 2, h / 2 - 48);
+      ctx.fillText(lines[0] ?? "", w / 2, h / 2 - 48);
       ctx.font = `${script ? "italic " : ""}600 62px Georgia, serif`;
-      ctx.fillText(lines[1], w / 2, h / 2 + 52);
+      ctx.fillText(lines[1] ?? "", w / 2, h / 2 + 52);
     } else {
-      ctx.fillText(lines[0], w / 2, h / 2);
+      ctx.fillText(lines[0] ?? "", w / 2, h / 2);
     }
   }, w, h);
 }
@@ -155,7 +155,7 @@ function Patch({
   rotation?: [number, number, number];
 }) {
   return (
-    <mesh position={position} rotation={rotation} castShadow>
+    <mesh position={position} rotation={rotation ?? [0, 0, 0]} castShadow>
       <planeGeometry args={size} />
       <meshStandardMaterial map={map} transparent roughness={0.85} />
     </mesh>
@@ -233,22 +233,6 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
   );
 }
 
-function Rig({ spin, target }: { spin: boolean; target: number | null }) {
-  const group = useRef<THREE.Group>(null);
-  useFrame((_, raw) => {
-    const dt = Math.min(raw, 0.05);
-    const g = group.current;
-    if (!g) return;
-    if (target !== null) {
-      const diff = ((target - g.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
-      g.rotation.y += diff * (1 - Math.exp(-7 * dt));
-    } else if (spin) {
-      g.rotation.y += dt * 0.5;
-    }
-  });
-  return <group ref={group}>{null}</group>;
-}
-
 export default function Jacket3D({
   cfg,
   spin,
@@ -259,7 +243,6 @@ export default function Jacket3D({
   targetY: number | null;
 }) {
   const inner = useRef<THREE.Group>(null);
-  useMemo(() => void 0, []);
 
   return (
     <Canvas
@@ -329,5 +312,3 @@ function SpinGroup({
   });
   return <group ref={innerRef}>{children}</group>;
 }
-
-export { Rig };
