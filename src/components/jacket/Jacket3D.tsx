@@ -199,6 +199,11 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
       <group scale={SCALE}>
         <primitive object={model} position={[0, -1227, -20]} />
       </group>
+      {/* debug: visibility test */}
+      <mesh position={[0.8, 0, 0]}>
+        <boxGeometry args={[0.4, 0.4, 0.4]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
 
       {/* front decorations (tuned against the GLB silhouette) */}
       {letter && (
