@@ -26,28 +26,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const STEPS = [
-  {
-    n: "01",
-    t: "The link arrives",
-    d: "The dealer rep sends one ordering link. School colours, mascot, activity and spec arrive with it — nothing to look up, nothing to sign in to.",
-  },
-  {
-    n: "02",
-    t: "The student builds",
-    d: "Package or à la carte. Letter, year, inserts, mascot, number, back name, monogram — all rendered on the jacket as they choose, with every price on its own row.",
-  },
-  {
-    n: "03",
-    t: "A parent approves",
-    d: "One email or text opens the review page. Approve as-is, or send it back with notes. The link is the access — no account, no password.",
-  },
-  {
-    n: "04",
-    t: "Payment closes it",
-    d: "Card, wallet or an invoice from the rep. On approval a payment window opens with reminders on day 1, 3, 5 and 7.",
-  },
-];
 
 const PACKAGES = [
   {
@@ -132,9 +110,6 @@ function Index() {
             AllRec
           </a>
           <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
-            <a href="#how" className="transition-colors hover:text-foreground">
-              How it works
-            </a>
             <a href="#sizing" className="transition-colors hover:text-foreground">
               Sizing
             </a>
@@ -181,16 +156,10 @@ function Index() {
                 >
                   Request a walkthrough
                 </a>
-                <a
-                  href="#how"
-                  className="rounded-lg border border-navy-foreground/25 px-6 py-3 text-sm font-semibold text-navy-foreground transition-colors hover:bg-navy-foreground/10"
-                >
-                  See the flow
-                </a>
               </div>
               <dl className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t border-navy-foreground/15 pt-7">
                 {[
-                  ["4 steps", "Start to submitted"],
+                  ["1 link", "The access"],
                   ["No sign-in", "The link is the access"],
                   ["XS–4XL", "Sizes production uses"],
                 ].map(([k, v]) => (
@@ -218,22 +187,6 @@ function Index() {
         </section>
 
 
-        {/* How it works */}
-        <section id="how" className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <p className="eyebrow text-muted-foreground">How it works</p>
-          <h2 className="mt-4 max-w-2xl text-4xl sm:text-5xl">
-            One link, four steps, one clean order
-          </h2>
-          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
-            {STEPS.map((s) => (
-              <div key={s.n} className="bg-card p-7">
-                <span className="font-display text-3xl text-gold-deep">{s.n}</span>
-                <h3 className="mt-4 text-lg tracking-normal">{s.t}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* Sizing */}
         <section id="sizing" className="border-y border-border bg-card">
