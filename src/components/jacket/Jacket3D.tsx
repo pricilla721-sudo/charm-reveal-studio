@@ -289,7 +289,13 @@ function ringPoint(u: number, rx: number, rz: number) {
 
 type Ring = { y: number; rx: number; rz: number };
 
-function loft(rings: Ring[], uSeg = 76, capBottom = true, capTop = true) {
+function loft(
+  rings: Ring[],
+  uSeg = 76,
+  capBottom = true,
+  capTop = true,
+  wrinkle?: (u: number, v: number) => number,
+) {
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
@@ -299,9 +305,12 @@ function loft(rings: Ring[], uSeg = 76, capBottom = true, capTop = true) {
   for (let vi = 0; vi < V; vi++) {
     const r = rings[vi]!;
     for (let ui = 0; ui <= uSeg; ui++) {
-      const [x, z] = ringPoint(ui / uSeg, r.rx, r.rz);
-      pos.push(x, r.y, z);
-      uv.push(ui / uSeg, vi / (V - 1));
+      const u = ui / uSeg;
+      const v = vi / (V - 1);
+      const d = wrinkle ? wrinkle(u, v) : 0;
+      const [x, z] = ringPoint(u, r.rx * (1 + d), r.rz * (1 + d));
+      pos.push(x, r.y + (wrinkle ? d * 0.35 : 0), z);
+      uv.push(u * 2.2, v * 2.4);
     }
   }
   for (let vi = 0; vi < V - 1; vi++) {
@@ -363,8 +372,20 @@ const BODY_KEYS: Ring[] = [
   { y: 0.82, rx: 0.16, rz: 0.105 },
 ];
 
+/** soft cloth drape: vertical folds at the hem, pull under the arms, general slack */
+function bodyWrinkle(u: number, v: number) {
+  const hem = Math.max(0, 1 - v / 0.3);
+  const arm = Math.max(0, 1 - Math.abs(v - 0.8) / 0.18);
+  const chest = Math.max(0, 1 - Math.abs(v - 0.55) / 0.3);
+  let d = 0.013 * nz(u, v, 8, 4) + 0.007 * nz(u, v, 17, 9);
+  d += 0.014 * hem * Math.sin(u * Math.PI * 2 * 11 + 0.7);
+  d += 0.011 * arm * nz(u, v, 12, 5);
+  d -= 0.008 * chest * Math.abs(nz(u, v, 6, 3));
+  return d;
+}
+
 function useBodyGeometry() {
-  return useMemo(() => loft(profileRings(BODY_KEYS, 64)), []);
+  return useMemo(() => loft(profileRings(BODY_KEYS, 92), 110, true, true, bodyWrinkle), []);
 }
 
 /** front surface z for a given x at chest height (used to curve patches onto the body) */
@@ -408,7 +429,13 @@ function patchGeometry(w: number, h: number, back: boolean, lift: number) {
 }
 
 /** tapered, gently bent tube for raglan sleeves */
-function tubeGeometry(points: THREE.Vector3[], radius: (t: number) => number, tub = 40, rad = 28) {
+function tubeGeometry(
+  points: THREE.Vector3[],
+  radius: (t: number) => number,
+  tub = 40,
+  rad = 28,
+  wrinkle?: (u: number, t: number) => number,
+) {
   const curve = new THREE.CatmullRomCurve3(points, false, "catmullrom", 0.4);
   const frames = curve.computeFrenetFrames(tub, false);
   const pos: number[] = [];
@@ -419,13 +446,13 @@ function tubeGeometry(points: THREE.Vector3[], radius: (t: number) => number, tu
     const p = curve.getPoint(t);
     const N = frames.normals[Math.min(i, tub - 1)]!;
     const B = frames.binormals[Math.min(i, tub - 1)]!;
-    const r = radius(t);
     for (let j = 0; j <= rad; j++) {
       const a = (j / rad) * Math.PI * 2;
+      const r = radius(t) * (1 + (wrinkle ? wrinkle(j / rad, t) : 0));
       const sx = Math.cos(a) * r;
       const sy = Math.sin(a) * r;
       pos.push(p.x + N.x * sx + B.x * sy, p.y + N.y * sx + B.y * sy, p.z + N.z * sx + B.z * sy);
-      uv.push(j / rad, t);
+      uv.push((j / rad) * 1.6, t * 3.2);
     }
   }
   const row = rad + 1;
@@ -475,6 +502,12 @@ function Sleeve({
           new THREE.Vector3(side * 0.86, -0.5, 0.12),
         ],
         (t) => 0.235 - 0.115 * Math.pow(t, 0.85),
+        56,
+        36,
+        (u, t) => {
+          const elbow = Math.max(0, 1 - Math.abs(t - 0.55) / 0.22);
+          return 0.02 * nz(u, t, 7, 5) + 0.03 * elbow * Math.sin(u * Math.PI * 2 * 5 + t * 9);
+        },
       ),
     [side],
   );
