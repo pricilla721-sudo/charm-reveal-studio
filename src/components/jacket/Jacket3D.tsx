@@ -561,7 +561,7 @@ function Patch({
   back,
 }: {
   map: THREE.Texture;
-  normal?: THREE.Texture;
+  normal?: THREE.Texture | null;
   size: [number, number];
   position: [number, number, number];
   back?: boolean;
@@ -573,7 +573,7 @@ function Patch({
         map={map}
         transparent
         roughness={0.95}
-        normalMap={normal}
+        normalMap={normal ?? null}
         normalScale={new THREE.Vector2(0.6, 0.6)}
         sheen={0.7}
         sheenRoughness={0.6}
