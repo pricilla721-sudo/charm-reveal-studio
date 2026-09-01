@@ -46,6 +46,9 @@ export default function JacketViewer({ cfg, className }: { cfg: JacketConfig; cl
           </button>
         ))}
       </div>
+      <p className="mt-2 text-center text-[10px] text-muted-foreground/70">
+        3D model: “Varsity Jacket” by 3DEE via Sketchfab (CC-BY)
+      </p>
     </div>
   );
 }
