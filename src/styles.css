@@ -277,11 +277,11 @@
   padding: 0.625rem 0.875rem;
   font-size: 0.9375rem;
   outline: none;
-}
 
-@utility field-input:focus {
-  border-color: var(--color-gold-deep);
-  box-shadow: 0 0 0 2px oklch(0.855 0.132 84 / 0.25);
+  &:focus {
+    border-color: var(--color-gold-deep);
+    box-shadow: 0 0 0 2px oklch(0.855 0.132 84 / 0.25);
+  }
 }
 
 @utility pkgchip {
