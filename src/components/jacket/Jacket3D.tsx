@@ -524,21 +524,28 @@ function Sleeve({
   return (
     <group>
       <mesh geometry={geo} castShadow receiveShadow>
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={color}
-          roughness={leather ? 0.4 : 0.88}
-          metalness={leather ? 0.08 : 0}
-          bumpMap={bump}
-          bumpScale={leather ? 0.05 : 0.11}
+          roughness={leather ? 0.45 : 0.94}
+          metalness={0}
+          normalMap={bump}
+          normalScale={new THREE.Vector2(leather ? 1.1 : 0.9, leather ? 1.1 : 0.9)}
+          clearcoat={leather ? 0.45 : 0}
+          clearcoatRoughness={leather ? 0.55 : 1}
+          sheen={leather ? 0 : 0.85}
+          sheenRoughness={0.65}
+          envMapIntensity={leather ? 0.9 : 0.45}
           side={THREE.FrontSide}
         />
       </mesh>
       <mesh geometry={cuff} castShadow>
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={trim}
-          roughness={0.96}
-          bumpMap={ribMap}
-          bumpScale={0.16}
+          roughness={0.98}
+          normalMap={ribMap}
+          normalScale={new THREE.Vector2(1.4, 1.4)}
+          sheen={0.5}
+          envMapIntensity={0.3}
           side={THREE.FrontSide}
         />
       </mesh>
@@ -548,11 +555,13 @@ function Sleeve({
 
 function Patch({
   map,
+  normal,
   size,
   position,
   back,
 }: {
   map: THREE.Texture;
+  normal?: THREE.Texture;
   size: [number, number];
   position: [number, number, number];
   back?: boolean;
@@ -560,16 +569,27 @@ function Patch({
   const geo = useMemo(() => patchGeometry(size[0], size[1], !!back, 0.012), [size[0], size[1], back]);
   return (
     <mesh geometry={geo} position={[position[0], position[1], 0]} castShadow>
-      <meshStandardMaterial map={map} transparent roughness={0.9} side={THREE.FrontSide} />
+      <meshPhysicalMaterial
+        map={map}
+        transparent
+        roughness={0.95}
+        normalMap={normal}
+        normalScale={new THREE.Vector2(0.6, 0.6)}
+        sheen={0.7}
+        sheenRoughness={0.6}
+        envMapIntensity={0.35}
+        side={THREE.FrontSide}
+      />
     </mesh>
   );
 }
 
 function JacketModel({ cfg }: { cfg: JacketConfig }) {
   const body = useBodyGeometry();
-  const wool = useMemo(woolBump, []);
-  const rib = useMemo(ribBump, []);
-  const leatherTex = useMemo(leatherBump, []);
+  const wool = useMemo(woolNormal, []);
+  const rib = useMemo(ribNormal, []);
+  const leatherTex = useMemo(leatherNormal, []);
+  const chenille = useMemo(chenilleNormal, []);
   const placketGeo = useMemo(() => patchGeometry(0.1, 1.5, false, 0.006), []);
   const pocketGeo = useMemo(() => patchGeometry(0.26, 0.035, false, 0.008), []);
   const sleeveColor = cfg.leather ? "#7C5B41" : cfg.sleeveColor;
@@ -633,26 +653,57 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
     <group position={[0, 0.05, 0]}>
       {/* wool body */}
       <mesh geometry={body} castShadow receiveShadow>
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={cfg.bodyColor}
-          roughness={0.93}
-          bumpMap={wool}
-          bumpScale={0.09}
+          roughness={0.96}
+          metalness={0}
+          normalMap={wool}
+          normalScale={new THREE.Vector2(0.9, 0.9)}
+          sheen={0.8}
+          sheenRoughness={0.7}
+          sheenColor={new THREE.Color("#ffffff")}
+          envMapIntensity={0.45}
           side={THREE.FrontSide}
         />
       </mesh>
 
       {/* ribbed knit collar + waistband */}
       <mesh geometry={collar} castShadow>
-        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.FrontSide} />
+        <meshPhysicalMaterial
+          color={cfg.trimColor}
+          roughness={0.98}
+          normalMap={rib}
+          normalScale={new THREE.Vector2(1.5, 1.5)}
+          sheen={0.5}
+          sheenRoughness={0.85}
+          envMapIntensity={0.3}
+          side={THREE.FrontSide}
+        />
       </mesh>
       <mesh geometry={band} castShadow>
-        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.FrontSide} />
+        <meshPhysicalMaterial
+          color={cfg.trimColor}
+          roughness={0.98}
+          normalMap={rib}
+          normalScale={new THREE.Vector2(1.5, 1.5)}
+          sheen={0.5}
+          sheenRoughness={0.85}
+          envMapIntensity={0.3}
+          side={THREE.FrontSide}
+        />
       </mesh>
 
       {/* snap placket + snaps, curved to the body */}
       <mesh geometry={placketGeo} position={[0, -0.02, 0]} castShadow>
-        <meshStandardMaterial color={cfg.bodyColor} roughness={0.8} bumpMap={wool} bumpScale={0.06} side={THREE.FrontSide} />
+        <meshPhysicalMaterial
+          color={cfg.bodyColor}
+          roughness={0.9}
+          normalMap={wool}
+          normalScale={new THREE.Vector2(0.7, 0.7)}
+          sheen={0.6}
+          envMapIntensity={0.4}
+          side={THREE.FrontSide}
+        />
       </mesh>
       {[0.56, 0.28, 0, -0.28, -0.56].map((y) => (
         <mesh key={y} position={[0, y, frontZ(0) + 0.024]}>
@@ -664,7 +715,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       {/* welt pockets */}
       {[-1, 1].map((s) => (
         <mesh key={s} geometry={pocketGeo} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
-          <meshStandardMaterial color={cfg.bodyColor} roughness={0.7} side={THREE.FrontSide} />
+          <meshStandardMaterial color={cfg.bodyColor} roughness={0.55} envMapIntensity={0.5} side={THREE.FrontSide} />
         </mesh>
       ))}
 
@@ -672,17 +723,17 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       <Sleeve side={1} color={sleeveColor} trim={cfg.trimColor} leather={cfg.leather} bump={cfg.leather ? leatherTex : wool} ribMap={rib} />
 
       {/* front decoration */}
-      {letterMap && <Patch map={letterMap} size={[0.3, 0.375]} position={[-0.21, 0.3, 0]} />}
-      {monoMap && <Patch map={monoMap} size={[0.4, 0.2]} position={[0.24, 0.3, 0]} />}
-      {yearMap && <Patch map={yearMap} size={[0.2, 0.15]} position={[0.3, -0.22, 0]} />}
-      {mascotMap && <Patch map={mascotMap} size={[0.24, 0.15]} position={[0.3, -0.44, 0]} />}
-      {numberMap && <Patch map={numberMap} size={[0.2, 0.15]} position={[-0.3, -0.44, 0]} />}
+      {letterMap && <Patch normal={chenille} map={letterMap} size={[0.3, 0.375]} position={[-0.21, 0.3, 0]} />}
+      {monoMap && <Patch normal={chenille} map={monoMap} size={[0.4, 0.2]} position={[0.24, 0.3, 0]} />}
+      {yearMap && <Patch normal={chenille} map={yearMap} size={[0.2, 0.15]} position={[0.3, -0.22, 0]} />}
+      {mascotMap && <Patch normal={chenille} map={mascotMap} size={[0.24, 0.15]} position={[0.3, -0.44, 0]} />}
+      {numberMap && <Patch normal={chenille} map={numberMap} size={[0.2, 0.15]} position={[-0.3, -0.44, 0]} />}
       {Array.from({ length: Math.min(cfg.inserts, 3) }).map((_, i) => (
         <Patch key={i} map={insertMap} size={[0.22, 0.15]} position={[-0.3, -0.22 + i * -0.44, 0]} />
       ))}
 
       {/* back name */}
-      {backMap && <Patch map={backMap} size={[0.8, 0.4]} position={[0, 0.2, 0]} back />}
+      {backMap && <Patch normal={chenille} map={backMap} size={[0.8, 0.4]} position={[0, 0.2, 0]} back />}
     </group>
   );
 }
@@ -704,11 +755,13 @@ export default function Jacket3D({
   return (
     <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0.1, 3.9], fov: 30 }} gl={{ antialias: true }}>
       <color attach="background" args={["#F5F5F8"]} />
-      <hemisphereLight args={["#ffffff", "#c9c6bd", 0.6]} />
+      <hemisphereLight args={["#ffffff", "#c3c0b6", 0.45]} />
       <directionalLight
         position={[2.5, 3.5, 3]}
-        intensity={1.5}
+        intensity={2.1}
         castShadow
+        shadow-bias={-0.0008}
+        shadow-radius={4}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-camera-left={-3}
@@ -716,7 +769,9 @@ export default function Jacket3D({
         shadow-camera-top={3}
         shadow-camera-bottom={-3}
       />
-      <directionalLight position={[-3, 1.5, -2.5]} intensity={0.5} />
+      <directionalLight position={[-3, 1.5, -2.5]} intensity={0.45} />
+      {/* rim light for fabric edge definition */}
+      <spotLight position={[-2.2, 2.2, -3.2]} angle={0.7} penumbra={1} intensity={2.4} color="#eef2ff" />
       <Environment>
         <Lightformer intensity={1.7} position={[0, 4, 2]} scale={[8, 8, 1]} />
         <Lightformer intensity={0.9} color="#dfe6f2" position={[-4, 1, -2]} rotation-y={Math.PI / 2} scale={[12, 3, 1]} />
