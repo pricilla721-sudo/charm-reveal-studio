@@ -191,8 +191,8 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       </mesh>
 
       {/* knit collar */}
-      <mesh position={[0, 0.8, 0]} castShadow>
-        <boxGeometry args={[0.56, 0.13, DEPTH + 0.16]} />
+      <mesh position={[0, 0.75, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.12, DEPTH + 0.14]} />
         <meshStandardMaterial color={cfg.trimColor} roughness={0.95} />
       </mesh>
 
