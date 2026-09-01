@@ -697,7 +697,7 @@ function PackageScreen({ state, setState }: { state: OrderState; setState: React
                       <span className="block text-base font-semibold">
                         {p.name}{" "}
                         {p.badge && (
-                          <span className="ml-2 rounded-md px-2 py-0.5 text-xs font-semibold text-gold-foreground" style={{ background: "var(--gradient-gold)" }}>
+                          <span className="ml-2 rounded-md bg-brand-red px-2 py-0.5 text-xs font-semibold text-white">
                             {p.badge}
                           </span>
                         )}
