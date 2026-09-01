@@ -281,36 +281,6 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
   );
 }
 
-function SurfacePatch({
-  map,
-  geo,
-  anchor,
-  fallbackPos,
-  fallbackRotY,
-}: {
-  map: THREE.Texture;
-  geo: THREE.BufferGeometry;
-  anchor: { pos: [number, number, number]; quat: THREE.Quaternion } | null;
-  fallbackPos: [number, number, number];
-  fallbackRotY: number;
-}) {
-  const material = (
-    <meshStandardMaterial map={map} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
-  );
-  if (anchor) {
-    return (
-      <mesh geometry={geo} position={anchor.pos} quaternion={anchor.quat}>
-        {material}
-      </mesh>
-    );
-  }
-  return (
-    <mesh geometry={geo} position={fallbackPos} rotation-y={fallbackRotY}>
-      {material}
-    </mesh>
-  );
-}
-
 /* ============================================================
    scene
    ============================================================ */
