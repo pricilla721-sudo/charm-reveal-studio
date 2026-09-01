@@ -395,7 +395,7 @@ function Sleeve({
           metalness={leather ? 0.08 : 0}
           bumpMap={bump}
           bumpScale={leather ? 0.05 : 0.11}
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
         />
       </mesh>
       <mesh geometry={cuff} castShadow>
@@ -404,7 +404,7 @@ function Sleeve({
           roughness={0.96}
           bumpMap={ribMap}
           bumpScale={0.16}
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
         />
       </mesh>
     </group>
@@ -503,21 +503,21 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
           roughness={0.93}
           bumpMap={wool}
           bumpScale={0.09}
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
         />
       </mesh>
 
       {/* ribbed knit collar + waistband */}
       <mesh geometry={collar} castShadow>
-        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.FrontSide} />
       </mesh>
       <mesh geometry={band} castShadow>
-        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={cfg.trimColor} roughness={0.96} bumpMap={rib} bumpScale={0.18} side={THREE.FrontSide} />
       </mesh>
 
       {/* snap placket + snaps, curved to the body */}
       <mesh geometry={placketGeo} position={[0, -0.02, 0]} castShadow>
-        <meshStandardMaterial color={cfg.bodyColor} roughness={0.8} bumpMap={wool} bumpScale={0.06} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={cfg.bodyColor} roughness={0.8} bumpMap={wool} bumpScale={0.06} side={THREE.FrontSide} />
       </mesh>
       {[0.56, 0.28, 0, -0.28, -0.56].map((y) => (
         <mesh key={y} position={[0, y, frontZ(0) + 0.024]}>
@@ -529,7 +529,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       {/* welt pockets */}
       {[-1, 1].map((s) => (
         <mesh key={s} geometry={pocketGeo} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
-          <meshStandardMaterial color={cfg.bodyColor} roughness={0.7} side={THREE.DoubleSide} />
+          <meshStandardMaterial color={cfg.bodyColor} roughness={0.7} side={THREE.FrontSide} />
         </mesh>
       ))}
 
