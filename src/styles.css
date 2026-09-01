@@ -152,6 +152,10 @@
   background: var(--gradient-gold);
 }
 
+@utility rule-red {
+  background: linear-gradient(90deg, var(--color-gold-deep), var(--color-brand-red));
+}
+
 @utility stepper {
   display: flex;
   gap: 0.5rem;
