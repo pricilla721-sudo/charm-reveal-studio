@@ -532,7 +532,7 @@ function Sleeve({
           normalScale={new THREE.Vector2(leather ? 1.1 : 0.9, leather ? 1.1 : 0.9)}
           clearcoat={leather ? 0.45 : 0}
           clearcoatRoughness={leather ? 0.55 : 1}
-          sheen={leather ? 0 : 0.85}
+          sheen={leather ? 0 : 0.3}
           sheenRoughness={0.65}
           envMapIntensity={leather ? 0.9 : 0.45}
           side={THREE.FrontSide}
@@ -658,10 +658,10 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
           roughness={0.96}
           metalness={0}
           normalMap={wool}
-          normalScale={new THREE.Vector2(0.9, 0.9)}
-          sheen={0.8}
-          sheenRoughness={0.7}
-          sheenColor={new THREE.Color("#ffffff")}
+          normalScale={new THREE.Vector2(1.25, 1.25)}
+          sheen={0.35}
+          sheenRoughness={0.55}
+          sheenColor={new THREE.Color("#b8c4dd")}
           envMapIntensity={0.45}
           side={THREE.FrontSide}
         />
@@ -755,10 +755,10 @@ export default function Jacket3D({
   return (
     <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0.1, 3.9], fov: 30 }} gl={{ antialias: true }}>
       <color attach="background" args={["#F5F5F8"]} />
-      <hemisphereLight args={["#ffffff", "#c3c0b6", 0.45]} />
+      <hemisphereLight args={["#eef2ff", "#b8b5ad", 0.32]} />
       <directionalLight
         position={[2.5, 3.5, 3]}
-        intensity={2.1}
+        intensity={1.7}
         castShadow
         shadow-bias={-0.0008}
         shadow-radius={4}
@@ -771,7 +771,7 @@ export default function Jacket3D({
       />
       <directionalLight position={[-3, 1.5, -2.5]} intensity={0.45} />
       {/* rim light for fabric edge definition */}
-      <spotLight position={[-2.2, 2.2, -3.2]} angle={0.7} penumbra={1} intensity={2.4} color="#eef2ff" />
+      <spotLight position={[-2.2, 2.2, -3.2]} angle={0.7} penumbra={1} intensity={0.9} color="#dce4f5" />
       <Environment>
         <Lightformer intensity={1.7} position={[0, 4, 2]} scale={[8, 8, 1]} />
         <Lightformer intensity={0.9} color="#dfe6f2" position={[-4, 1, -2]} rotation-y={Math.PI / 2} scale={[12, 3, 1]} />
