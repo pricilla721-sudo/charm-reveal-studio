@@ -487,10 +487,10 @@ function tubeGeometry(
 /** classic varsity stripe layout across a knit trim (base / accent bands) */
 const STRIPES: Array<[number, number, boolean]> = [
   [0, 0.3, false],
-  [0.28, 0.42, true],
-  [0.4, 0.6, false],
-  [0.58, 0.72, true],
-  [0.7, 1, false],
+  [0.28, 0.52, true],
+  [0.5, 0.72, false],
+  [0.7, 0.86, true],
+  [0.84, 1, false],
 ];
 
 function RibKnit({
@@ -517,7 +517,7 @@ function RibKnit({
       {segs.map((s, i) => (
         <mesh key={i} geometry={s.g} castShadow receiveShadow>
           <meshPhysicalMaterial
-            color={s.acc ? "#00ff00" : trim}
+            color={s.acc ? accent : trim}
             roughness={0.98}
             normalMap={ribMap}
             normalScale={new THREE.Vector2(1.5, 1.5)}
@@ -596,7 +596,7 @@ function Sleeve({
   /** cuff split into rib stripes along its axis */
   const cuffs = useMemo(() => {
     const a = new THREE.Vector3(side * 0.855, -0.455, 0.113);
-    const b = new THREE.Vector3(side * 0.878, -0.625, 0.147);
+    const b = new THREE.Vector3(side * 0.885, -0.68, 0.158);
     return STRIPES.map(([s, e, acc]) => ({
       g: tubeGeometry([a.clone().lerp(b, s), a.clone().lerp(b, (s + e) / 2), a.clone().lerp(b, e)], () => 0.128, 4, 26),
       acc,
@@ -688,9 +688,9 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
   );
   const bandKeys = useMemo<Ring[]>(
     () => [
-      { y: -0.94, rx: 0.485, rz: 0.195 },
-      { y: -0.86, rx: 0.515, rz: 0.207 },
-      { y: -0.76, rx: 0.525, rz: 0.212 },
+      { y: -1.0, rx: 0.475, rz: 0.19 },
+      { y: -0.9, rx: 0.515, rz: 0.207 },
+      { y: -0.76, rx: 0.528, rz: 0.213 },
     ],
     [],
   );
