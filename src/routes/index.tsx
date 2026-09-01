@@ -396,10 +396,10 @@ function JacketPreview({ state, view }: { state: OrderState; view: "front" | "ba
 function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur ${
+      className={`sticky top-0 z-50 ${
         inverse
-          ? "border-b border-navy-foreground/10 bg-navy-deep/30"
-          : "border-b border-border/70 bg-background/85"
+          ? "border-b border-navy-foreground/10 bg-navy-deep"
+          : "border-b border-border/70 bg-background/85 backdrop-blur"
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
