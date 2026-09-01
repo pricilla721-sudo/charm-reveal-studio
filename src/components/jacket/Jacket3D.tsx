@@ -555,6 +555,7 @@ function Sleeve({
   side,
   color,
   trim,
+  accent,
   leather,
   bump,
   ribMap,
@@ -562,6 +563,7 @@ function Sleeve({
   side: 1 | -1;
   color: string;
   trim: string;
+  accent: string;
   leather: boolean;
   bump: THREE.Texture;
   ribMap: THREE.Texture;
@@ -570,32 +572,36 @@ function Sleeve({
     () =>
       tubeGeometry(
         [
-          new THREE.Vector3(side * 0.3, 0.62, 0),
-          new THREE.Vector3(side * 0.52, 0.44, 0.01),
-          new THREE.Vector3(side * 0.68, 0.14, 0.03),
-          new THREE.Vector3(side * 0.79, -0.18, 0.07),
-          new THREE.Vector3(side * 0.86, -0.5, 0.12),
+          new THREE.Vector3(side * 0.32, 0.6, 0),
+          new THREE.Vector3(side * 0.54, 0.42, 0.01),
+          new THREE.Vector3(side * 0.69, 0.12, 0.03),
+          new THREE.Vector3(side * 0.8, -0.2, 0.07),
+          new THREE.Vector3(side * 0.865, -0.5, 0.12),
         ],
-        (t) => 0.235 - 0.115 * Math.pow(t, 0.85),
+        (t) => 0.245 - 0.125 * Math.pow(t, 0.8),
         56,
         36,
         (u, t) => {
           const elbow = Math.max(0, 1 - Math.abs(t - 0.55) / 0.22);
-          return 0.02 * nz(u, t, 7, 5) + 0.03 * elbow * Math.sin(u * Math.PI * 2 * 5 + t * 9);
+          const pit = Math.max(0, 1 - t / 0.18);
+          return (
+            0.02 * nz(u, t, 7, 5) +
+            0.028 * elbow * Math.sin(u * Math.PI * 2 * 5 + t * 9) +
+            0.03 * pit * nz(u, t, 4, 3)
+          );
         },
       ),
     [side],
   );
-  const cuff = useMemo(
-    () =>
-      tubeGeometry(
-        [new THREE.Vector3(side * 0.855, -0.46, 0.115), new THREE.Vector3(side * 0.875, -0.62, 0.145)],
-        () => 0.125,
-        6,
-        24,
-      ),
-    [side],
-  );
+  /** cuff split into rib stripes along its axis */
+  const cuffs = useMemo(() => {
+    const a = new THREE.Vector3(side * 0.855, -0.455, 0.113);
+    const b = new THREE.Vector3(side * 0.878, -0.625, 0.147);
+    return STRIPES.map(([s, e, acc]) => ({
+      g: tubeGeometry([a.clone().lerp(b, s), a.clone().lerp(b, (s + e) / 2), a.clone().lerp(b, e)], () => 0.128, 4, 26),
+      acc,
+    }));
+  }, [side]);
   return (
     <group>
       <mesh geometry={geo} castShadow receiveShadow>
@@ -613,20 +619,23 @@ function Sleeve({
           side={THREE.FrontSide}
         />
       </mesh>
-      <mesh geometry={cuff} castShadow>
-        <meshPhysicalMaterial
-          color={trim}
-          roughness={0.98}
-          normalMap={ribMap}
-          normalScale={new THREE.Vector2(1.4, 1.4)}
-          sheen={0.5}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
+      {cuffs.map((c, i) => (
+        <mesh key={i} geometry={c.g} castShadow>
+          <meshPhysicalMaterial
+            color={c.acc ? accent : trim}
+            roughness={0.98}
+            normalMap={ribMap}
+            normalScale={new THREE.Vector2(1.4, 1.4)}
+            sheen={0.5}
+            envMapIntensity={0.3}
+            side={THREE.FrontSide}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
+
 
 function Patch({
   map,
