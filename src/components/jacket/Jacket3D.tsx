@@ -307,7 +307,7 @@ export default function Jacket3D({
       shadows
       dpr={[1, 2]}
       camera={{ position: [0, 0.1, 3.6], fov: 30 }}
-      gl={{ antialias: true }}
+      gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping, toneMappingExposure: 1.0 }}
       onCreated={(state) => {
         (window as unknown as { __r3f?: unknown }).__r3f = state;
       }}
