@@ -479,27 +479,32 @@ function PriceRail({ state }: { state: OrderState }) {
   );
 }
 
+function jacketConfig(state: OrderState): JacketConfig {
+  return {
+    bodyColor: SCHOOL.colors.body,
+    sleeveColor: SCHOOL.colors.sleeve,
+    trimColor: SCHOOL.colors.trim,
+    leather: state.sleeves === "leather",
+    letter: state.letter === "make" || state.letter === "included",
+    letterChar: SCHOOL.initials.charAt(0),
+    mono: state.mono,
+    monoText: state.monoText || "Name",
+    monoScript: state.monoStyle.includes("Script"),
+    inserts: state.inserts.length,
+    year: state.year ? "'" + String(state.student.grad).slice(-2) : null,
+    mascot: state.mascotPatch,
+    number: state.number ? state.numberVal || "##" : null,
+    backName: state.backName,
+    backLine1: state.backNameL1 || "Last Name",
+    backLine2: state.backNameL2 || "",
+    backScript: state.backNameStyle === "Script",
+  };
+}
+
 function MobilePreview({ state }: { state: OrderState }) {
-  const [view, setView] = useState<"front" | "back">("front");
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="mx-auto h-56 w-48">
-        <JacketPreview state={state} view={view} />
-      </div>
-      <div className="mt-3 flex justify-center gap-2" role="group" aria-label="Jacket view">
-        <button
-          onClick={() => setView("front")}
-          className={`rounded-md px-3 py-1 text-xs font-semibold ${view === "front" ? "bg-navy text-navy-foreground" : "bg-muted text-muted-foreground"}`}
-        >
-          Front
-        </button>
-        <button
-          onClick={() => setView("back")}
-          className={`rounded-md px-3 py-1 text-xs font-semibold ${view === "back" ? "bg-navy text-navy-foreground" : "bg-muted text-muted-foreground"}`}
-        >
-          Back
-        </button>
-      </div>
+      <JacketViewer cfg={jacketConfig(state)} />
     </div>
   );
 }
