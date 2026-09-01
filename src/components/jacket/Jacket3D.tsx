@@ -283,7 +283,7 @@ function patchGeometry(w: number, h: number, back: boolean, lift: number) {
       const px = (i / seg - 0.5) * w;
       const z = frontZ(px) + lift;
       pos.push(px, py, back ? -z : z);
-      uv.push(back ? 1 - i / seg : i / seg, 1 - j / seg);
+      uv.push(back ? i / seg : 1 - i / seg, j / seg);
     }
   }
   const row = seg + 1;
@@ -567,7 +567,7 @@ export default function Jacket3D({
   const inner = useRef<THREE.Group>(null);
 
   return (
-    <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0.12, 4.6], fov: 30 }} gl={{ antialias: true }}>
+    <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0.1, 3.9], fov: 30 }} gl={{ antialias: true }}>
       <color attach="background" args={["#F5F5F8"]} />
       <hemisphereLight args={["#ffffff", "#c9c6bd", 0.6]} />
       <directionalLight
