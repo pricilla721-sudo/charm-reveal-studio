@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import jacketCutout from "@/assets/jacket-cutout.png";
+import JacketViewer from "@/components/jacket/JacketViewer";
+import type { JacketConfig } from "@/components/jacket/config";
 
 export const Route = createFileRoute("/")({
   head: () => ({
