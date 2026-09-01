@@ -393,33 +393,21 @@ function JacketPreview({ state, view }: { state: OrderState; view: "front" | "ba
 }
 
 /* ---------------- shared chrome ---------------- */
-function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
+function AppBar({ sub }: { sub?: string }) {
   return (
-    <header
-      className={`sticky top-0 z-50 ${
-        inverse
-          ? "border-b border-navy-foreground/10 bg-navy-deep"
-          : "border-b border-border/70 bg-background/85 backdrop-blur"
-      }`}
-    >
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-navy-foreground ring-2 ring-brand-red">
           {SCHOOL.initials}
         </div>
         <div className="flex-1">
-          <div className={`text-sm font-semibold leading-tight ${inverse ? "text-navy-foreground" : ""}`}>
-            {SCHOOL.name}
-          </div>
-          <div className={`text-xs ${inverse ? "text-navy-foreground/70" : "text-muted-foreground"}`}>
-            {sub || "Letter jacket ordering"}
-          </div>
+          <div className="text-sm font-semibold leading-tight">{SCHOOL.name}</div>
+          <div className="text-xs text-muted-foreground">{sub || "Letter jacket ordering"}</div>
         </div>
-        <div className={`hidden text-right text-xs sm:block ${inverse ? "text-navy-foreground/70" : "text-muted-foreground"}`}>
+        <div className="hidden text-right text-xs text-muted-foreground sm:block">
           Fulfilled by
           <br />
-          <span className={`font-semibold ${inverse ? "text-navy-foreground" : "text-foreground"}`}>
-            AllRec Awards
-          </span>
+          <span className="font-semibold text-foreground">AllRec Awards</span>
         </div>
       </div>
     </header>
