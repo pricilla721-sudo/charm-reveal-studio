@@ -359,17 +359,25 @@ function profileRings(keys: Ring[], steps: number): Ring[] {
   return out;
 }
 
+/** contiguous slice of a ring list, by normalised range */
+function sliceRings(rings: Ring[], a: number, b: number): Ring[] {
+  const n = rings.length - 1;
+  const i0 = Math.max(0, Math.floor(a * n));
+  const i1 = Math.min(n, Math.ceil(b * n));
+  return rings.slice(i0, i1 + 1);
+}
+
 const BODY_KEYS: Ring[] = [
-  { y: -0.78, rx: 0.5, rz: 0.2 },
-  { y: -0.68, rx: 0.535, rz: 0.215 },
-  { y: -0.42, rx: 0.5, rz: 0.2 },
-  { y: -0.1, rx: 0.505, rz: 0.205 },
-  { y: 0.2, rx: 0.53, rz: 0.215 },
-  { y: 0.45, rx: 0.555, rz: 0.225 },
-  { y: 0.6, rx: 0.545, rz: 0.222 },
-  { y: 0.7, rx: 0.44, rz: 0.2 },
-  { y: 0.78, rx: 0.26, rz: 0.15 },
-  { y: 0.82, rx: 0.16, rz: 0.105 },
+  { y: -0.78, rx: 0.495, rz: 0.198 },
+  { y: -0.68, rx: 0.53, rz: 0.214 },
+  { y: -0.42, rx: 0.498, rz: 0.198 },
+  { y: -0.1, rx: 0.5, rz: 0.202 },
+  { y: 0.2, rx: 0.532, rz: 0.216 },
+  { y: 0.45, rx: 0.575, rz: 0.228 },
+  { y: 0.6, rx: 0.6, rz: 0.226 },
+  { y: 0.68, rx: 0.53, rz: 0.212 },
+  { y: 0.75, rx: 0.33, rz: 0.172 },
+  { y: 0.8, rx: 0.185, rz: 0.115 },
 ];
 
 /** soft cloth drape: vertical folds at the hem, pull under the arms, general slack */
