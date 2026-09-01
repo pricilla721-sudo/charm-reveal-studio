@@ -734,31 +734,13 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
         />
       </mesh>
 
-      {/* ribbed knit collar + waistband */}
-      <mesh geometry={collar} castShadow>
-        <meshPhysicalMaterial
-          color={cfg.trimColor}
-          roughness={0.98}
-          normalMap={rib}
-          normalScale={new THREE.Vector2(1.5, 1.5)}
-          sheen={0.5}
-          sheenRoughness={0.85}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
-      <mesh geometry={band} castShadow>
-        <meshPhysicalMaterial
-          color={cfg.trimColor}
-          roughness={0.98}
-          normalMap={rib}
-          normalScale={new THREE.Vector2(1.5, 1.5)}
-          sheen={0.5}
-          sheenRoughness={0.85}
-          envMapIntensity={0.3}
-          side={THREE.FrontSide}
-        />
-      </mesh>
+      {/* striped rib knit collar + waistband */}
+      <RibKnit keys={collarKeys} trim={cfg.trimColor} accent={cfg.bodyColor} ribMap={rib} />
+      <RibKnit keys={bandKeys} trim={cfg.trimColor} accent={cfg.bodyColor} ribMap={rib} />
+
+      {/* stitched side seams */}
+      <BodySeam u={0.0} />
+      <BodySeam u={0.5} />
 
       {/* snap placket + snaps, curved to the body */}
       <mesh geometry={placketGeo} position={[0, -0.02, 0]} castShadow>
@@ -774,7 +756,7 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       </mesh>
       {[0.56, 0.28, 0, -0.28, -0.56].map((y) => (
         <mesh key={y} position={[0, y, frontZ(0) + 0.024]}>
-          <sphereGeometry args={[0.026, 18, 12]} />
+          <sphereGeometry args={[0.024, 18, 12]} />
           <meshStandardMaterial color="#D9D3C5" roughness={0.25} metalness={0.9} />
         </mesh>
       ))}
@@ -782,12 +764,29 @@ function JacketModel({ cfg }: { cfg: JacketConfig }) {
       {/* welt pockets */}
       {[-1, 1].map((s) => (
         <mesh key={s} geometry={pocketGeo} position={[s * 0.28, -0.5, 0]} rotation={[0, 0, s * 0.14]}>
-          <meshStandardMaterial color={cfg.bodyColor} roughness={0.55} envMapIntensity={0.5} side={THREE.FrontSide} />
+          <meshStandardMaterial color="#0e1621" roughness={0.7} envMapIntensity={0.3} side={THREE.FrontSide} />
         </mesh>
       ))}
 
-      <Sleeve side={-1} color={sleeveColor} trim={cfg.trimColor} leather={cfg.leather} bump={cfg.leather ? leatherTex : wool} ribMap={rib} />
-      <Sleeve side={1} color={sleeveColor} trim={cfg.trimColor} leather={cfg.leather} bump={cfg.leather ? leatherTex : wool} ribMap={rib} />
+      <Sleeve
+        side={-1}
+        color={sleeveColor}
+        trim={cfg.trimColor}
+        accent={cfg.bodyColor}
+        leather={cfg.leather}
+        bump={cfg.leather ? leatherTex : wool}
+        ribMap={rib}
+      />
+      <Sleeve
+        side={1}
+        color={sleeveColor}
+        trim={cfg.trimColor}
+        accent={cfg.bodyColor}
+        leather={cfg.leather}
+        bump={cfg.leather ? leatherTex : wool}
+        ribMap={rib}
+      />
+
 
       {/* front decoration */}
       {letterMap && <Patch normal={chenille} map={letterMap} size={[0.3, 0.375]} position={[-0.21, 0.3, 0]} />}
