@@ -217,36 +217,6 @@ function Index() {
           </div>
         </section>
 
-        {/* Problem */}
-        <section className="border-b border-border bg-card">
-          <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-            <div className="grid gap-10 md:grid-cols-[.9fr_1.1fr]">
-              <h2 className="text-3xl sm:text-4xl">Why the form had to go</h2>
-              <div className="grid gap-6 sm:grid-cols-3">
-                {[
-                  [
-                    "Illegible slips",
-                    "A carbon form filled in a gym at a folding table is the least reliable document in the whole build.",
-                  ],
-                  [
-                    "Missing fields",
-                    "Monogram spelling, year style, mascot placement — the fields most often blank are the ones that stop production.",
-                  ],
-                  [
-                    "Money at the table",
-                    "Cash and cheques collected on site, reconciled weeks later, with nothing tying a payment to a jacket.",
-                  ],
-                ].map(([t, d]) => (
-                  <div key={t}>
-                    <div className="h-0.5 w-8 bg-brand-red" />
-                    <h3 className="mt-4 text-base tracking-normal">{t}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{d}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* How it works */}
         <section id="how" className="mx-auto max-w-6xl px-6 py-20 md:py-28">
