@@ -6,3 +6,5 @@
 ## Done
 - [x] Remove "Why the form had to go" section.
 - [x] Remove "How it works" section, nav link, hero CTA, and unused STEPS constant.
+
+- [x] 3D jacket realism pass: fabric weave normal maps, wool sheen material, cloth wrinkles/drape, seam + topstitch detail (user: "still looks cartoony")
