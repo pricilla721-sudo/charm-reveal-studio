@@ -517,7 +517,7 @@ function RibKnit({
       {segs.map((s, i) => (
         <mesh key={i} geometry={s.g} castShadow receiveShadow>
           <meshPhysicalMaterial
-            color={s.acc ? accent : trim}
+            color={s.acc ? "#00ff00" : trim}
             roughness={0.98}
             normalMap={ribMap}
             normalScale={new THREE.Vector2(1.5, 1.5)}
