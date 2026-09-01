@@ -527,6 +527,7 @@ function PkgChip({ state }: { state: OrderState }) {
 function WelcomeScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
   return (
     <main className="min-h-screen">
+      <AppBar inverse />
       <section className="surface-navy relative overflow-hidden">
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 md:grid-cols-[1.05fr_.95fr] md:py-28">
           <div>
