@@ -1224,10 +1224,13 @@ function BuildPlacementScreen({ state, setState }: { state: OrderState; setState
               Standard placement follows your school's spec. Use the note only if you have a documented exception.
             </p>
             <div className="mt-8 space-y-4">
-              {[
-                ["standard", "Standard placement", "Follow the school-approved spec for every patch."],
-                ["custom", "Custom placement", "I'll describe where something should go differently."],
-              ].map(([key, title, desc]) => {
+              {(
+                [
+                  ["standard", "Standard placement", "Follow the school-approved spec for every patch."],
+                  ["custom", "Custom placement", "I'll describe where something should go differently."],
+                ] as const
+              ).map(([key, title, desc]) => {
+
                 const selected = state.placement === key;
                 return (
                   <button
