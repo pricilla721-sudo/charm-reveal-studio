@@ -290,8 +290,8 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
         tex: badgeTexture("★", cfg.trimColor, cfg.bodyColor, true),
         w: 0.11,
         h: 0.11,
-        x: -0.45,
-        y: 0.17,
+        x: -0.4,
+        y: 0.14,
         front: true,
       });
     for (let i = 0; i < Math.min(cfg.inserts, 2); i++)
@@ -300,8 +300,8 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
         tex: badgeTexture(String(i + 1), cfg.bodyColor, cfg.trimColor, true),
         w: 0.11,
         h: 0.11,
-        x: 0.45,
-        y: 0.17 - i * 0.14,
+        x: 0.4,
+        y: 0.14 - i * 0.14,
         front: true,
       });
     if (cfg.backName)
