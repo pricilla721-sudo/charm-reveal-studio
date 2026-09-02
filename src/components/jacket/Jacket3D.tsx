@@ -334,7 +334,7 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
     const ray = new THREE.Raycaster();
 
     const conform = (s: Spec): THREE.BufferGeometry | null => {
-      const seg = 14;
+      const seg = 8;
       const dir = new THREE.Vector3(0, 0, s.front ? -1 : 1);
       const sx = s.front ? 1 : -1; // mirror U on the back so text reads correctly
       const pts: (THREE.Vector3 | null)[] = [];
