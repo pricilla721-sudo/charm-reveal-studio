@@ -177,7 +177,7 @@ function badgeTexture(text: string, fill: string, ink: string, round: boolean) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = ink;
-    fitFont(ctx, text, w * 0.72, (px) => `800 ${px}px "Arial Black", sans-serif`, h * 0.44);
+    fitFont(ctx, text, w * 0.72, (px) => `800 ${px}px "Arial Black", "DejaVu Sans", sans-serif`, h * 0.5);
     ctx.fillText(text, w / 2, h / 2);
   }, 320, 256);
 }
@@ -290,8 +290,8 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
         tex: badgeTexture("★", cfg.trimColor, cfg.bodyColor, true),
         w: 0.11,
         h: 0.11,
-        x: -0.34,
-        y: 0.08,
+        x: -0.45,
+        y: 0.17,
         front: true,
       });
     for (let i = 0; i < Math.min(cfg.inserts, 2); i++)
@@ -300,8 +300,8 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
         tex: badgeTexture(String(i + 1), cfg.bodyColor, cfg.trimColor, true),
         w: 0.11,
         h: 0.11,
-        x: 0.34,
-        y: 0.08 - i * 0.14,
+        x: 0.45,
+        y: 0.17 - i * 0.14,
         front: true,
       });
     if (cfg.backName)
