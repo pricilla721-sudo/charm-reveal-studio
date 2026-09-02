@@ -102,19 +102,37 @@ function patchTexture(
   return t;
 }
 
+/* shrink the font until the text fits inside the canvas with padding */
+function fitFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  makeFont: (px: number) => string,
+  startPx: number,
+) {
+  let px = startPx;
+  for (let i = 0; i < 40; i++) {
+    ctx.font = makeFont(px);
+    if (ctx.measureText(text).width <= maxWidth) break;
+    px *= 0.94;
+  }
+  return px;
+}
+
 function letterTexture(char: string, feltColor: string) {
   return patchTexture((ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    ctx.font = `900 ${h * 0.86}px "Arial Black", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
+    const pad = h * 0.16; // room for the chenille outline stroke
+    fitFont(ctx, char, w - pad * 2, (px) => `900 ${px}px "Arial Black", sans-serif`, h * 0.74);
     ctx.strokeStyle = "#f3ead2";
-    ctx.lineWidth = h * 0.14;
+    ctx.lineWidth = h * 0.13;
     ctx.strokeText(char, w / 2, h / 2);
     ctx.fillStyle = feltColor;
     ctx.fillText(char, w / 2, h / 2);
-  }, 256, 320);
+  }, 320, 384);
 }
 
 function scriptTexture(lines: string[], color: string) {
@@ -124,24 +142,44 @@ function scriptTexture(lines: string[], color: string) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const step = h / (lines.length + 0.4);
+    const pad = w * 0.07;
     lines.forEach((line, i) => {
-      ctx.font = `italic 700 ${step * 0.62}px Georgia, serif`;
+      fitFont(ctx, line, w - pad * 2, (px) => `italic 700 ${px}px Georgia, serif`, step * 0.6);
       ctx.fillText(line, w / 2, step * (i + 0.72));
     });
-  }, 512, 256);
+  }, 640, 288);
 }
 
-/* plane geometry gently bent around a chest radius so patches hug the body */
-function bentPlane(w: number, h: number, radius: number): THREE.PlaneGeometry {
-  const g = new THREE.PlaneGeometry(w, h, 16, 1);
-  const pos = g.attributes["position"] as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const ax = Math.min(Math.abs(x), radius * 0.95);
-    pos.setZ(i, -(radius - Math.sqrt(radius * radius - ax * ax)));
-  }
-  g.computeVertexNormals();
-  return g;
+/* small sewn felt badge (year, jersey number, activity insert, mascot) */
+function badgeTexture(text: string, fill: string, ink: string, round: boolean) {
+  return patchTexture((ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    const m = Math.min(w, h) * 0.08;
+    ctx.beginPath();
+    if (round) {
+      ctx.ellipse(w / 2, h / 2, w / 2 - m, h / 2 - m, 0, 0, Math.PI * 2);
+    } else {
+      const r = Math.min(w, h) * 0.22;
+      const x = m, y = m, ww = w - m * 2, hh = h - m * 2;
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + ww, y, x + ww, y + hh, r);
+      ctx.arcTo(x + ww, y + hh, x, y + hh, r);
+      ctx.arcTo(x, y + hh, x, y, r);
+      ctx.arcTo(x, y, x + ww, y, r);
+      ctx.closePath();
+    }
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.lineWidth = Math.min(w, h) * 0.07;
+    ctx.strokeStyle = "#f3ead2";
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = ink;
+    fitFont(ctx, text, w * 0.72, (px) => `800 ${px}px "Arial Black", "DejaVu Sans", sans-serif`, h * 0.5);
+    ctx.fillText(text, w / 2, h / 2);
+  }, 320, 256);
 }
 
 /* ============================================================
@@ -193,58 +231,207 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
     return root;
   }, [scene, fabric, cfg.trimColor]);
 
-  /* anchor patches to the actual jacket surface via raycast, so they sit
-     on the fabric (angled with it) instead of floating on a flat plane */
+  /* every selectable decoration, with its target spot on the jacket */
+  type Spec = {
+    id: string;
+    tex: THREE.CanvasTexture | null;
+    w: number;
+    h: number;
+    x: number;
+    y: number;
+    front: boolean;
+  };
+
+  const specs = useMemo<Spec[]>(() => {
+    const list: Spec[] = [];
+    if (cfg.letter)
+      list.push({
+        id: "letter",
+        tex: letterTexture(cfg.letterChar || "N", cfg.bodyColor),
+        w: 0.19,
+        h: 0.23,
+        x: -0.17,
+        y: 0.26,
+        front: true,
+      });
+    if (cfg.mono)
+      list.push({
+        id: "mono",
+        tex: scriptTexture([cfg.monoText || "Name"], cfg.trimColor),
+        w: 0.26,
+        h: 0.11,
+        x: 0.18,
+        y: 0.27,
+        front: true,
+      });
+    if (cfg.year)
+      list.push({
+        id: "year",
+        tex: badgeTexture(cfg.year, cfg.trimColor, cfg.bodyColor, false),
+        w: 0.13,
+        h: 0.1,
+        x: -0.17,
+        y: 0.1,
+        front: true,
+      });
+    if (cfg.number)
+      list.push({
+        id: "number",
+        tex: badgeTexture(cfg.number, cfg.bodyColor, cfg.trimColor, false),
+        w: 0.12,
+        h: 0.1,
+        x: 0.18,
+        y: 0.1,
+        front: true,
+      });
+    if (cfg.mascot)
+      list.push({
+        id: "mascot",
+        tex: badgeTexture("★", cfg.trimColor, cfg.bodyColor, true),
+        w: 0.11,
+        h: 0.11,
+        x: -0.4,
+        y: 0.14,
+        front: true,
+      });
+    for (let i = 0; i < Math.min(cfg.inserts, 2); i++)
+      list.push({
+        id: "insert" + i,
+        tex: badgeTexture(String(i + 1), cfg.bodyColor, cfg.trimColor, true),
+        w: 0.11,
+        h: 0.11,
+        x: 0.4,
+        y: 0.14 - i * 0.14,
+        front: true,
+      });
+    if (cfg.backName)
+      list.push({
+        id: "backName",
+        tex: scriptTexture(
+          [cfg.backLine1 || "Last Name", ...(cfg.backLine2 ? [cfg.backLine2] : [])],
+          "#f3ead2",
+        ),
+        w: 0.55,
+        h: 0.26,
+        x: 0,
+        y: 0.28,
+        front: false,
+      });
+    return list;
+  }, [cfg]);
+
+  /* Build each patch as a mesh that is projected onto the jacket surface:
+     a grid of rays is fired at the fabric and every vertex is placed on the
+     hit point (offset along the surface normal). Quads whose corners miss the
+     fabric are dropped, so a patch never floats and never cuts through. */
   const groupRef = useRef<THREE.Group>(null);
-  type Anchor = { pos: [number, number, number]; quat: THREE.Quaternion };
-  const [anchors, setAnchors] = useState<{ letter: Anchor | null; mono: Anchor | null; backName: Anchor | null }>({
-    letter: null,
-    mono: null,
-    backName: null,
-  });
+  const [geos, setGeos] = useState<Map<string, THREE.BufferGeometry>>(new Map());
 
   useEffect(() => {
     const g = groupRef.current;
     if (!g) return;
     g.updateWorldMatrix(true, true);
-    const gQuatInv = g.getWorldQuaternion(new THREE.Quaternion()).invert();
     const ray = new THREE.Raycaster();
-    const find = (x: number, y: number, front: boolean): Anchor | null => {
-      ray.set(new THREE.Vector3(x, y + 0.06, front ? 3 : -3), new THREE.Vector3(0, 0, front ? -1 : 1));
-      const hit = ray.intersectObject(model, true)[0];
-      if (!hit || !hit.face) return null;
-      const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
-      const worldQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
-      const worldPos = hit.point.clone().addScaledVector(n, 0.003);
-      const local = g.worldToLocal(worldPos);
-      return { pos: [local.x, local.y, local.z], quat: gQuatInv.clone().multiply(worldQuat) };
+
+    const conform = (s: Spec): THREE.BufferGeometry | null => {
+      const seg = 8;
+      const dir = new THREE.Vector3(0, 0, s.front ? -1 : 1);
+      const sx = s.front ? 1 : -1; // mirror U on the back so text reads correctly
+      const pts: (THREE.Vector3 | null)[] = [];
+      let hits = 0;
+      for (let j = 0; j <= seg; j++) {
+        for (let i = 0; i <= seg; i++) {
+          const u = i / seg;
+          const v = j / seg;
+          const wx = s.x + (u - 0.5) * s.w * sx;
+          const wy = s.y + (0.5 - v) * s.h;
+          ray.set(new THREE.Vector3(wx, wy + 0.06, s.front ? 3 : -3), dir);
+          const hit = ray.intersectObject(model, true)[0];
+          if (!hit || !hit.face) {
+            pts.push(null);
+            continue;
+          }
+          const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
+          if (n.dot(dir) > 0) n.negate();
+          const world = hit.point.clone().addScaledVector(n, 0.006);
+          pts.push(g.worldToLocal(world));
+          hits++;
+        }
+      }
+      if (hits < (seg + 1) * (seg + 1) * 0.4) return null;
+
+      const at = (i: number, j: number) => j * (seg + 1) + i;
+
+      // fill gaps from the nearest hit neighbours so the patch stays one
+      // continuous piece instead of showing holes / clipped edges
+      for (let pass = 0; pass < seg * 2; pass++) {
+        let filled = 0;
+        for (let j = 0; j <= seg; j++) {
+          for (let i = 0; i <= seg; i++) {
+            if (pts[at(i, j)]) continue;
+            const nb = [
+              [i - 1, j],
+              [i + 1, j],
+              [i, j - 1],
+              [i, j + 1],
+            ]
+              .filter(([a, b]) => a! >= 0 && a! <= seg && b! >= 0 && b! <= seg)
+              .map(([a, b]) => pts[at(a!, b!)])
+              .filter(Boolean) as THREE.Vector3[];
+            if (!nb.length) continue;
+            const avg = nb
+              .reduce((acc, v) => acc.add(v), new THREE.Vector3())
+              .multiplyScalar(1 / nb.length);
+            // extend outward along the patch plane, keep the neighbour depth
+            const u = i / seg;
+            const v = j / seg;
+            const world = new THREE.Vector3(
+              s.x + (u - 0.5) * s.w * sx,
+              s.y + (0.5 - v) * s.h + 0.06,
+              0,
+            );
+            const local = g.worldToLocal(world);
+            pts[at(i, j)] = new THREE.Vector3(local.x, local.y, avg.z);
+            filled++;
+          }
+        }
+        if (!filled) break;
+      }
+
+      const pos: number[] = [];
+      const uv: number[] = [];
+      const index: number[] = [];
+      for (let j = 0; j <= seg; j++) {
+        for (let i = 0; i <= seg; i++) {
+          const p = pts[at(i, j)]!;
+          pos.push(p.x, p.y, p.z);
+          uv.push(i / seg, 1 - j / seg);
+        }
+      }
+      for (let j = 0; j < seg; j++) {
+        for (let i = 0; i < seg; i++) {
+          const a = at(i, j), b = at(i + 1, j), c = at(i + 1, j + 1), d = at(i, j + 1);
+          if (s.front) index.push(a, d, c, a, c, b);
+          else index.push(a, c, d, a, b, c);
+        }
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+      geo.setIndex(index);
+      geo.computeVertexNormals();
+      return geo;
     };
-    setAnchors({
-      letter: find(-0.24, 0.28, true),
-      mono: find(0.25, 0.3, true),
-      backName: find(0, 0.3, false),
+
+    const next = new Map<string, THREE.BufferGeometry>();
+    specs.forEach((s) => {
+      const geo = conform(s);
+      if (geo) next.set(s.id, geo);
     });
-  }, [model]);
-
-  const letter = useMemo(
-    () => (cfg.letter ? letterTexture(cfg.letterChar || "N", cfg.bodyColor) : null),
-    [cfg.letter, cfg.letterChar, cfg.bodyColor],
-  );
-  const mono = useMemo(
-    () => (cfg.mono ? scriptTexture([cfg.monoText || "Name"], "#f3ead2") : null),
-    [cfg.mono, cfg.monoText],
-  );
-  const backName = useMemo(
-    () =>
-      cfg.backName
-        ? scriptTexture([cfg.backLine1 || "Last Name", ...(cfg.backLine2 ? [cfg.backLine2] : [])], "#f3ead2")
-        : null,
-    [cfg.backName, cfg.backLine1, cfg.backLine2],
-  );
-
-  const letterGeo = useMemo(() => bentPlane(0.26, 0.32, 0.3), []);
-  const monoGeo = useMemo(() => bentPlane(0.3, 0.15, 0.28), []);
-  const backGeo = useMemo(() => bentPlane(0.7, 0.35, 0.5), []);
+    setGeos(next);
+    return () => next.forEach((geo) => geo.dispose());
+  }, [model, specs]);
 
   return (
     <group ref={groupRef} position={[0, 0.06, 0]}>
@@ -253,40 +440,29 @@ function GLBJacket({ cfg }: { cfg: JacketConfig }) {
         <primitive object={model} position={[0, -1227, -20]} />
       </group>
 
-      {/* decorations anchored to the jacket surface (raycast), hugging the fabric */}
-      {letter && (
-        <mesh
-          geometry={letterGeo}
-          {...(anchors.letter
-            ? { position: anchors.letter.pos, quaternion: anchors.letter.quat }
-            : { position: [-0.24, 0.28, 0.3] as [number, number, number], "rotation-y": 0.18 })}
-        >
-          <meshStandardMaterial map={letter} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
-        </mesh>
-      )}
-      {mono && (
-        <mesh
-          geometry={monoGeo}
-          {...(anchors.mono
-            ? { position: anchors.mono.pos, quaternion: anchors.mono.quat }
-            : { position: [0.25, 0.3, 0.3] as [number, number, number], "rotation-y": -0.18 })}
-        >
-          <meshStandardMaterial map={mono} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
-        </mesh>
-      )}
-      {backName && (
-        <mesh
-          geometry={backGeo}
-          {...(anchors.backName
-            ? { position: anchors.backName.pos, quaternion: anchors.backName.quat }
-            : { position: [0, 0.3, -0.32] as [number, number, number], "rotation-y": Math.PI })}
-        >
-          <meshStandardMaterial map={backName} transparent roughness={0.9} polygonOffset polygonOffsetFactor={-1} />
-        </mesh>
-      )}
+      {/* decorations projected onto the fabric surface */}
+      {specs.map((s) => {
+        const geo = geos.get(s.id);
+        if (!geo) return null;
+        return (
+          <mesh key={s.id} geometry={geo}>
+            <meshStandardMaterial
+              map={s.tex}
+              transparent
+              roughness={0.9}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+              polygonOffset
+              polygonOffsetFactor={-4}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
+
 }
+
 
 /* ============================================================
    scene
