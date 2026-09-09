@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import jacketCutout from "@/assets/jacket-cutout.png";
+import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
 import type { JacketConfig } from "@/components/jacket/config";
 
@@ -40,11 +41,11 @@ const SCHOOL = {
 };
 
 const REP = {
-  name: "Dilling Awards",
-  short: "Dilling",
+  name: "All-Star Letter Jackets",
+  short: "All-Star",
   collects: true,
   payNote:
-    "Dilling Awards will email you an invoice with a card link, or you can pay at the school office.",
+    "All-Star Letter Jackets will email you an invoice with a card link, or you can pay at the school office.",
 };
 
 const PACKAGES = [
@@ -291,22 +292,26 @@ function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-navy-foreground ring-2 ring-brand-red">
-          {SCHOOL.initials}
-        </div>
+        <img
+          src={dealerLogoAsset.url}
+          width={401}
+          height={154}
+          alt={`${REP.name} logo`}
+          className="h-10 w-auto max-w-[190px] object-contain"
+        />
         <div className="flex-1">
           <div className={`text-sm font-semibold leading-tight ${inverse ? "text-navy-foreground" : ""}`}>
-            {SCHOOL.name}
+            {REP.name}
           </div>
           <div className={`text-xs ${inverse ? "text-navy-foreground/70" : "text-muted-foreground"}`}>
             {sub || "Letter jacket ordering"}
           </div>
         </div>
         <div className={`hidden text-right text-xs sm:block ${inverse ? "text-navy-foreground/70" : "text-muted-foreground"}`}>
-          Fulfilled by
+          Ordering for
           <br />
           <span className={`font-semibold ${inverse ? "text-navy-foreground" : "text-foreground"}`}>
-            AllRec Awards
+            {SCHOOL.name}
           </span>
         </div>
       </div>
@@ -424,6 +429,15 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
       <section className="surface-navy relative overflow-hidden">
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 md:grid-cols-[1.05fr_.95fr] md:py-28">
           <div>
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-foreground font-display text-base font-bold text-navy ring-2 ring-gold">
+                {SCHOOL.initials}
+              </div>
+              <div>
+                <div className="font-display text-lg font-semibold uppercase text-navy-foreground">{SCHOOL.name}</div>
+                <div className="text-xs text-navy-foreground/60">Official letter jacket order</div>
+              </div>
+            </div>
             <p className="eyebrow text-gold">
               Class of {state.student.grad} <span className="text-brand-red-bright">· {SCHOOL.activity}</span>
             </p>
