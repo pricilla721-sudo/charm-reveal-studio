@@ -38,7 +38,7 @@ function recolorFabric(src: CanvasImageSource, cfg: JacketConfig): THREE.CanvasT
   const img = ctx.getImageData(0, 0, size, size);
   const d = img.data;
   const body = hexToRgb(cfg.bodyColor);
-  const sleeve = hexToRgb(cfg.leather ? "#7C5B41" : cfg.sleeveColor);
+  const sleeve = hexToRgb(cfg.sleeveColor);
   const trim = hexToRgb(cfg.trimColor);
 
   for (let i = 0; i < d.length; i += 4) {

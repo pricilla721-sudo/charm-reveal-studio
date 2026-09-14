@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import jacketCutout from "@/assets/jacket-cutout.png";
+import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
 import type { JacketConfig } from "@/components/jacket/config";
@@ -37,7 +37,7 @@ const SCHOOL = {
   mascot: "Northstar",
   activity: "Football",
   closes: "October 15",
-  colors: { body: "#1B2A3B", sleeve: "#EFE9DD", trim: "#C9A227" },
+  colors: { body: "#111B45", sleeve: "#C72A2F", trim: "#D6A928" },
 };
 
 const REP = {
@@ -424,71 +424,70 @@ function PkgChip({ state }: { state: OrderState }) {
 /* ---------------- screens ---------------- */
 function WelcomeScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
   return (
-    <main className="min-h-screen">
-      <AppBar inverse />
-      <section className="surface-navy relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 md:grid-cols-[1.05fr_.95fr] md:py-28">
-          <div>
+    <main className="min-h-screen bg-background">
+      <AppBar />
+      <section className="hero-editorial relative overflow-hidden">
+        <div className="absolute inset-y-0 left-0 hidden w-[8%] bg-navy lg:block" />
+        <div className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-8 px-6 py-12 md:grid-cols-[.9fr_1.1fr] md:py-16 lg:px-16">
+          <div className="relative z-10 md:pl-4">
             <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-foreground font-display text-base font-bold text-navy ring-2 ring-gold">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy font-display text-base font-bold text-gold ring-2 ring-gold">
                 {SCHOOL.initials}
               </div>
               <div>
-                <div className="font-display text-lg font-semibold uppercase text-navy-foreground">{SCHOOL.name}</div>
-                <div className="text-xs text-navy-foreground/60">Official letter jacket order</div>
+                <div className="font-display text-xl font-semibold uppercase text-navy">{SCHOOL.name}</div>
+                <div className="text-xs font-medium uppercase text-muted-foreground">Official letter jacket order</div>
               </div>
             </div>
-            <p className="eyebrow text-gold">
-              Class of {state.student.grad} <span className="text-brand-red-bright">· {SCHOOL.activity}</span>
+            <p className="eyebrow text-brand-red">
+              Class of {state.student.grad} <span className="text-navy">· {SCHOOL.activity}</span>
             </p>
-            <h1 className="mt-5 text-5xl sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 text-6xl text-navy sm:text-7xl lg:text-8xl">
               Wear what
               <br />
-              you <span className="text-gold-gradient">earned.</span>
+              you <span className="text-brand-red">earned.</span>
             </h1>
-            <div className="rule-red mt-8 h-px w-24" />
-            <p className="mt-7 max-w-lg text-base leading-relaxed text-navy-foreground/75">
+            <div className="rule-red mt-7 h-1 w-28" />
+            <p className="mt-7 max-w-lg text-base leading-relaxed text-muted-foreground">
               Build your {SCHOOL.mascot} jacket on screen. Every patch, every letter, exactly where you want it — with the price in front of you the whole way.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setState((s) => ({ ...s, screen: "student" }))}
-                className="rounded-lg px-6 py-3 text-sm font-semibold text-gold-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5"
-                style={{ background: "var(--gradient-gold)" }}
+                className="rounded-md bg-navy px-7 py-3 text-sm font-semibold uppercase text-primary-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5"
               >
                 Start building
               </button>
             </div>
-            <dl className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t border-navy-foreground/15 pt-7">
+            <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-border pt-6">
               {[
                 ["Starting at", "$" + PRICE.base],
                 ["Ordering closes", SCHOOL.closes],
                 ["Delivered to", SCHOOL.name],
               ].map(([k, v]) => (
                 <div key={k}>
-                  <dt className="text-xs text-navy-foreground/60">{k}</dt>
-                  <dd className="mt-1 font-display text-xl text-gold">{v}</dd>
+                  <dt className="text-xs text-muted-foreground">{k}</dt>
+                  <dd className="mt-1 font-display text-xl text-navy">{v}</dd>
                 </div>
               ))}
             </dl>
           </div>
-          <div className="relative">
-            <div
-              className="absolute left-1/2 top-1/2 -z-0 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-              style={{ background: "var(--gradient-gold)", opacity: 0.16 }}
-            />
+          <div className="relative flex min-h-[440px] items-center justify-center md:min-h-[640px]">
+            <div className="absolute inset-y-6 right-[-12vw] left-[18%] bg-navy" />
+            <div className="absolute bottom-6 right-[-12vw] left-[18%] h-2 bg-brand-red" />
+            <div className="absolute right-0 top-10 font-display text-[9rem] leading-none text-primary-foreground/5 md:text-[13rem]">NS</div>
             <img
               src={jacketCutout}
               width={1024}
               height={1408}
-              alt="Navy and bone letter jacket with a gold chenille chest letter"
-              className="float-anim relative mx-auto w-full max-w-lg -rotate-3 drop-shadow-[0_40px_60px_oklch(0.1_0.04_268_/_0.55)] md:-mr-10 md:scale-110"
+              alt="Navy and red Northstar letter jacket with white and gold chenille details"
+              className="float-anim relative mx-auto w-full max-w-lg drop-shadow-[0_40px_50px_oklch(0.1_0.04_268_/_0.42)] md:scale-110"
             />
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
+      <section className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-6 sm:grid-cols-3">
           {[
             ["1", "Build it", "Sleeves, size, letter, patches, monogram — priced as you go."],
