@@ -2,6 +2,7 @@
 
 ## Active
 - [ ] Reconsider page purpose: designed *like* a marketing site, but not a generic marketing site. The link is already sent to the student, so content should match the actual context (order landing / product page, not a brochure).
+- [ ] Add a dealer salesperson catalogue view for browsing and managing all assigned products.
 
 ## Done
 - [x] Restyle the order flow around the dealer business card: navy-led palette, red structure, white fields, retained gold accents, and navy/red jacket colors.

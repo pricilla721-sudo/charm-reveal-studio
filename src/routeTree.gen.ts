@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JacketTestRouteImport } from './routes/jacket-test'
+import { Route as SalesRouteImport } from './routes/sales'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const JacketTestRoute = JacketTestRouteImport.update({
   path: '/jacket-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesRoute = SalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
+  '/sales': typeof SalesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
+  '/sales': typeof SalesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
+  '/sales': typeof SalesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/jacket-test'
+  fullPaths: '/' | '/jacket-test' | '/sales'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/jacket-test'
-  id: '__root__' | '/' | '/jacket-test'
+  to: '/' | '/jacket-test' | '/sales'
+  id: '__root__' | '/' | '/jacket-test' | '/sales'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JacketTestRoute: typeof JacketTestRoute
+  SalesRoute: typeof SalesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JacketTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales': {
+      id: '/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof SalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JacketTestRoute: JacketTestRoute,
+  SalesRoute: SalesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
