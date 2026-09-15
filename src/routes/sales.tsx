@@ -293,6 +293,7 @@ function SalesCatalogue() {
                 <SelectItem className="focus:bg-primary focus:text-primary-foreground" value="westlake">Westlake Prep</SelectItem>
               </SelectContent>
             </Select>
+            </div>
           </section>
 
           <section className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5" aria-label="Product categories">
