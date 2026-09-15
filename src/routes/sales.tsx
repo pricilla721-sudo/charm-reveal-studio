@@ -4,6 +4,7 @@ import {
   Award,
   ChevronDown,
   CircleDollarSign,
+  Download,
   Grid2X2,
   LayoutList,
   Medal,
