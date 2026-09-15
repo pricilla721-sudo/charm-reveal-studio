@@ -282,10 +282,10 @@ function SalesCatalogue() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="portfolio">All assigned schools · 18</SelectItem>
-                <SelectItem value="northstar">Northstar High</SelectItem>
-                <SelectItem value="central">Central Academy</SelectItem>
-                <SelectItem value="westlake">Westlake Prep</SelectItem>
+                <SelectItem className="focus:bg-primary focus:text-primary-foreground" value="portfolio">All assigned schools · 18</SelectItem>
+                <SelectItem className="focus:bg-primary focus:text-primary-foreground" value="northstar">Northstar High</SelectItem>
+                <SelectItem className="focus:bg-primary focus:text-primary-foreground" value="central">Central Academy</SelectItem>
+                <SelectItem className="focus:bg-primary focus:text-primary-foreground" value="westlake">Westlake Prep</SelectItem>
               </SelectContent>
             </Select>
           </section>
