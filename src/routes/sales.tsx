@@ -277,7 +277,11 @@ function SalesCatalogue() {
                 <h1 className="mt-1 text-4xl text-navy sm:text-5xl">Product catalogue</h1>
               </div>
             </div>
-            <Select defaultValue="portfolio">
+            <div className="flex items-center gap-3 print:hidden">
+              <Button variant="outline" onClick={() => window.print()}>
+                <Download className="mr-2 h-4 w-4" /> Download
+              </Button>
+              <Select defaultValue="portfolio">
               <SelectTrigger className="w-full bg-card lg:w-80" aria-label="School portfolio">
                 <Store className="mr-2 h-4 w-4 text-brand-red" />
                 <SelectValue />
