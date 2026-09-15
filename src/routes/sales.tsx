@@ -2,8 +2,11 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Award,
-  ChevronDown,
+  BarChart3,
+  Boxes,
+  Building2,
   CircleDollarSign,
+  ClipboardList,
   Download,
   Grid2X2,
   LayoutList,
@@ -12,10 +15,12 @@ import {
   Pencil,
   Search,
   Shield,
+  ShoppingBag,
   SlidersHorizontal,
   Sparkles,
   Store,
   Tag,
+  UserRound,
   Users,
 } from "lucide-react";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
@@ -245,25 +250,54 @@ function SalesCatalogue() {
   return (
     <TooltipProvider>
       <main className="min-h-screen bg-secondary/45">
-        <header className="border-b border-primary-foreground/10 bg-navy text-primary-foreground">
-          <div className="mx-auto flex max-w-[1500px] items-center gap-5 px-5 py-3 lg:px-8">
-            <Link to="/" className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gold text-gold-foreground">
-                <Sparkles className="h-5 w-5" />
+        <header className="sticky top-0 z-40 border-b border-primary-foreground/10 bg-navy/95 text-primary-foreground shadow-[var(--shadow-card)] backdrop-blur-xl print:hidden">
+          <div className="mx-auto flex max-w-[1500px] flex-wrap items-center px-4 sm:px-5 lg:flex-nowrap lg:px-8">
+            <Link to="/" className="flex min-w-0 items-center gap-3 py-3 lg:mr-10">
+              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary-foreground text-navy">
+                <Sparkles className="absolute right-1 top-1 h-3 w-3 text-brand-red" />
+                <span className="font-display text-xl leading-none">AS</span>
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold uppercase text-gold">Paperless orders</div>
-                <div className="truncate font-display text-lg leading-none">Sales catalogue</div>
+                <div className="text-[11px] font-bold uppercase text-brand-red-bright">All-Star Letter Jackets</div>
+                <div className="truncate font-display text-lg leading-none">Dealer workspace</div>
               </div>
             </Link>
-            <nav className="ml-auto hidden items-center gap-1 rounded-md bg-primary-foreground/8 p-1 md:flex" aria-label="Sales areas">
-              <Button size="sm" variant="secondary">Catalogue</Button>
-              <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">Customer orders</Button>
-            </nav>
-            <div className="hidden border-l border-primary-foreground/15 pl-5 text-right lg:block">
-              <div className="text-sm font-semibold">Morgan Lee</div>
-              <div className="text-xs text-primary-foreground/60">All-Star · Sales</div>
+
+            <div className="ml-auto flex items-center gap-3 py-3 lg:order-3 lg:ml-6">
+              <div className="hidden text-right sm:block">
+                <div className="text-sm font-semibold leading-tight">Morgan Lee</div>
+                <div className="text-xs text-primary-foreground/55">Dealer representative</div>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full border border-primary-foreground/15 bg-primary-foreground/8 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                aria-label="Open account menu"
+              >
+                <UserRound />
+              </Button>
             </div>
+
+            <nav className="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-primary-foreground/10 lg:order-2 lg:w-auto lg:flex-1 lg:self-stretch lg:border-t-0" aria-label="Sales areas">
+              {[
+                { label: "Orders", icon: ClipboardList },
+                { label: "Catalogue", icon: ShoppingBag, active: true },
+                { label: "Packages", icon: Boxes },
+                { label: "Schools", icon: Building2 },
+                { label: "Totals", icon: BarChart3 },
+              ].map(({ label, icon: Icon, active }) => (
+                <Button
+                  key={label}
+                  type="button"
+                  variant="ghost"
+                  className={`relative h-12 shrink-0 rounded-none px-3 text-primary-foreground/65 hover:bg-primary-foreground/8 hover:text-primary-foreground lg:h-auto lg:px-4 ${active ? "text-primary-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <Icon className={active ? "text-gold" : ""} />
+                  <span>{label}</span>
+                </Button>
+              ))}
+            </nav>
           </div>
         </header>
 
