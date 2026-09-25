@@ -16,3 +16,5 @@
 
 - [x] Keep procedural jacket (user chose option 3): striped rib knit collar/cuffs/waistband, broader shoulders + tapered waist silhouette, stitched side seams, darker welt pockets
 - [ ] (deferred) Swap procedural 3D jacket for a real GLB model — blocked: needs a downloadable/licensed source (user-uploaded file or Sketchfab API token)
+
+- [ ] Build the general Albany school landing page from the selected middle split direction, keeping it activity-neutral.
