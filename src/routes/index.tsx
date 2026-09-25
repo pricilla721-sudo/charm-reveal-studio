@@ -489,7 +489,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
         </div>
 
         <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-end px-5 pb-14 pt-16 lg:min-h-[680px] lg:grid-cols-[1.25fr_.75fr] lg:items-center lg:px-8 lg:pb-8">
-          <div className="max-w-xl lg:col-start-2">
+          <div className="max-w-sm lg:col-start-2 2xl:max-w-md">
             <div className="mb-5 flex items-center gap-3">
               <span className="h-px w-10 bg-brand-red" />
               <p className="font-display text-sm uppercase text-gold">Albany Lions · Class of 2027</p>
@@ -511,7 +511,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             width={1024}
             height={1280}
             alt="Albany navy, red and gold varsity jacket"
-            className="float-anim absolute -bottom-20 -right-14 hidden w-[25rem] drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-[29rem]"
+            className="float-anim absolute -bottom-16 -right-8 hidden w-56 drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-72"
           />
         </div>
         <div className="absolute bottom-0 inset-x-0 h-1.5 bg-brand-red" />
