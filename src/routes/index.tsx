@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
+import albanyJacket from "@/assets/albany-jacket.png";
+import albanyStudents from "@/assets/albany-students.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
 import type { JacketConfig } from "@/components/jacket/config";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -106,7 +110,20 @@ const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
 const ACTIVITIES = ["Football", "Basketball", "Volleyball", "Band", "Cheer", "Soccer", "Track"];
 
+const SCHOOL_ACTIVITIES = [
+  { name: "Football", category: "Athletics", icon: Trophy },
+  { name: "Basketball", category: "Athletics", icon: Trophy },
+  { name: "Baseball", category: "Athletics", icon: Trophy },
+  { name: "Track & Field", category: "Athletics", icon: Trophy },
+  { name: "Cheer", category: "Spirit", icon: Sparkles },
+  { name: "Band", category: "Fine Arts", icon: Music2 },
+  { name: "Choir", category: "Fine Arts", icon: Music2 },
+  { name: "Theatre", category: "Fine Arts", icon: Drama },
+  { name: "Academics", category: "Academics", icon: BookOpen },
+];
+
 const ORDER: Screen[] = [
+  "school",
   "welcome",
   "student",
   "package",
@@ -136,6 +153,7 @@ const BUILD_STEPS = [
 
 /* ---------------- types ---------------- */
 type Screen =
+  | "school"
   | "welcome"
   | "student"
   | "package"
@@ -155,6 +173,7 @@ type Screen =
 
 interface OrderState {
   screen: Screen;
+  selectedActivity: string | null;
   pkg: string | null;
   sizingMethod: "photo" | "quiz" | "chart" | "measured" | null;
   size: string | null;
@@ -198,7 +217,8 @@ function money0(n: number) {
 
 function useOrderState() {
   return useState<OrderState>({
-    screen: "welcome",
+    screen: "school",
+    selectedActivity: null,
     pkg: "classic",
     sizingMethod: null,
     size: null,
