@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
 import albanyJacket from "@/assets/albany-jacket-original-palette.png";
-import albanyStudents from "@/assets/albany-students-personalized.jpg";
+import albanyStudents from "@/assets/albany-students-right.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
@@ -478,13 +478,13 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
       </header>
 
       <section className="relative min-h-[680px] overflow-hidden bg-navy-deep pt-20 lg:min-h-[760px]">
-        <div className="absolute inset-0 overflow-hidden lg:left-[40%]">
+        <div className="absolute inset-0 overflow-hidden">
           <img
             src={albanyStudents}
             width={1536}
             height={1024}
             alt="Four Albany students wearing the school's navy, cream and gold letter jacket"
-            className="h-full w-full scale-110 object-cover object-center"
+            className="h-full w-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/45 to-navy-deep/20 lg:bg-gradient-to-r lg:from-navy-deep lg:via-navy-deep/55 lg:to-navy-deep/15" />
         </div>
