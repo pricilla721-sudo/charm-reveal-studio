@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
-import albanyJacket from "@/assets/albany-jacket.png";
-import albanyStudents from "@/assets/albany-students.jpg";
+import albanyJacket from "@/assets/albany-jacket-original-palette.png";
+import albanyStudents from "@/assets/albany-students-original-palette.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
@@ -483,7 +483,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             src={albanyStudents}
             width={1536}
             height={1024}
-            alt="Four Albany students wearing the school's navy and red letter jacket"
+            alt="Four Albany students wearing the school's navy, cream and gold letter jacket"
             className="h-full w-full object-cover object-[42%_center]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/20 to-navy-deep/5 lg:bg-gradient-to-r lg:from-navy-deep/15 lg:via-navy-deep/25 lg:to-navy-deep" />
@@ -511,7 +511,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             src={albanyJacket}
             width={1024}
             height={1280}
-            alt="Albany navy, red and gold varsity jacket"
+            alt="Albany navy, cream and gold varsity jacket"
             className="float-anim absolute -bottom-16 -right-8 hidden w-56 drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-72"
           />
         </div>
