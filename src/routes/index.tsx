@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
 import albanyJacket from "@/assets/albany-jacket-original-palette.png";
-import albanyStudents from "@/assets/albany-students-detailed-jackets.jpg";
+import albanyStudents from "@/assets/albany-students-personalized.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
