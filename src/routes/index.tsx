@@ -510,23 +510,23 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
         <div className="absolute bottom-0 inset-x-0 h-px bg-brand-red" />
       </section>
 
-      <section className="relative bg-background py-14 sm:py-20" aria-labelledby="activity-heading">
-        <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[18rem_1fr] lg:gap-14">
+      <section className="relative bg-background py-16 sm:py-24" aria-labelledby="activity-heading">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[20rem_1fr] lg:gap-16">
             <div>
               <p className="eyebrow text-gold-deep">Start your order</p>
-              <h2 id="activity-heading" className="mt-3 text-4xl text-navy sm:text-5xl">What did you letter in?</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              <h2 id="activity-heading" className="mt-3 text-5xl text-navy sm:text-6xl">What did you letter in?</h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
                 Choose your primary activity. You can add other earned patches while building your jacket.
               </p>
-              <div className="mt-7 flex flex-wrap gap-2 lg:flex-col lg:items-start">
+              <div className="mt-8 flex flex-wrap gap-2.5 lg:flex-col lg:items-start lg:gap-3">
                 {categories.map((item) => (
                   <Button
                     key={item}
                     type="button"
                     variant={category === item ? "default" : "ghost"}
                     onClick={() => setCategory(item)}
-                    className="h-9 justify-start px-4 text-xs font-semibold uppercase"
+                    className="h-11 justify-start px-5 text-sm font-semibold uppercase tracking-wide"
                   >
                     {item}
                   </Button>
@@ -535,7 +535,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             </div>
 
             <div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {visibleActivities.map(({ name, category: activityCategory, icon: Icon }) => {
                   const selected = state.selectedActivity === name;
                   return (
@@ -544,30 +544,30 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
                       type="button"
                       variant="outline"
                       onClick={() => setState((current) => ({ ...current, selectedActivity: name }))}
-                      className={`h-auto min-h-20 justify-start gap-4 whitespace-normal border p-4 text-left shadow-none ${selected ? "border-gold-deep bg-gold/10 ring-1 ring-gold-deep" : "bg-card hover:border-gold-deep hover:bg-card"}`}
+                      className={`h-auto min-h-24 justify-start gap-4 whitespace-normal border p-5 text-left shadow-none ${selected ? "border-gold-deep bg-gold/10 ring-1 ring-gold-deep" : "bg-card hover:border-gold-deep hover:bg-card"}`}
                       aria-pressed={selected}
                     >
-                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${selected ? "bg-navy text-gold" : "bg-muted text-muted-foreground"}`}>
-                        <Icon aria-hidden="true" />
+                      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${selected ? "bg-navy text-gold" : "bg-muted text-muted-foreground"}`}>
+                        <Icon aria-hidden="true" className="h-6 w-6" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold text-foreground">{name}</span>
-                        <span className="mt-1 block text-xs font-normal text-muted-foreground">{activityCategory}</span>
+                        <span className="block text-base font-bold text-foreground">{name}</span>
+                        <span className="mt-1 block text-sm font-normal text-muted-foreground">{activityCategory}</span>
                       </span>
-                      <span className={`h-4 w-4 shrink-0 rounded-full border-2 ${selected ? "border-gold-deep bg-gold shadow-[inset_0_0_0_3px_var(--color-card)]" : "border-border"}`} />
+                      <span className={`h-5 w-5 shrink-0 rounded-full border-2 ${selected ? "border-gold-deep bg-gold shadow-[inset_0_0_0_3px_var(--color-card)]" : "border-border"}`} />
                     </Button>
                   );
                 })}
               </div>
 
-              <div className="mt-7 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-muted-foreground">Don't see yours? Ask your school's jacket coordinator.</p>
+              <div className="mt-8 flex flex-col gap-4 border-t border-border pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">Don't see yours? Ask your school's jacket coordinator.</p>
                 <Button
                   type="button"
                   size="lg"
                   onClick={continueToOrder}
                   disabled={!state.selectedActivity}
-                  className="h-12 min-w-48 bg-gold font-bold uppercase text-gold-foreground hover:bg-gold-deep"
+                  className="h-14 min-w-56 bg-gold text-base font-bold uppercase text-gold-foreground hover:bg-gold-deep"
                 >
                   Continue <ArrowRight aria-hidden="true" />
                 </Button>
