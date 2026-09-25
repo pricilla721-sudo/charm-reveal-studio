@@ -478,13 +478,13 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
       </header>
 
       <section className="relative min-h-[680px] overflow-hidden bg-navy-deep pt-20 lg:min-h-[760px]">
-        <div className="absolute inset-0 lg:right-[40%]">
+        <div className="absolute inset-0 overflow-hidden lg:right-[40%]">
           <img
             src={albanyStudents}
             width={1536}
             height={1024}
             alt="Four Albany students wearing the school's navy, cream and gold letter jacket"
-            className="h-full w-full translate-x-[10%] scale-125 object-cover object-center"
+            className="h-full w-full object-cover object-left"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/45 to-navy-deep/20 lg:bg-gradient-to-r lg:from-navy-deep/40 lg:via-navy-deep/55 lg:to-navy-deep" />
         </div>
