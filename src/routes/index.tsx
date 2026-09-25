@@ -462,8 +462,9 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
     <main className="min-h-screen bg-background">
       <header className="absolute inset-x-0 top-0 z-40 border-b border-navy-foreground/15 bg-navy-deep/55 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-4 lg:px-8">
-          <div className="flex h-10 w-10 items-center justify-center border border-gold/70 bg-brand-red font-display text-2xl text-navy-foreground">
+          <div className="relative flex h-10 w-10 items-center justify-center border border-gold/70 bg-navy font-display text-2xl text-gold">
             A
+            <span className="absolute -bottom-px -right-px h-2 w-2 bg-brand-red" aria-hidden="true" />
           </div>
           <div className="leading-none">
             <div className="font-display text-xl text-navy-foreground">ALBANY H.S.</div>
@@ -514,14 +515,14 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             className="float-anim absolute -bottom-16 -right-8 hidden w-56 drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-72"
           />
         </div>
-        <div className="absolute bottom-0 inset-x-0 h-1.5 bg-brand-red" />
+        <div className="absolute bottom-0 inset-x-0 h-px bg-brand-red" />
       </section>
 
       <section className="relative bg-background py-14 sm:py-20" aria-labelledby="activity-heading">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-[18rem_1fr] lg:gap-14">
             <div>
-              <p className="eyebrow text-brand-red">Start your order</p>
+              <p className="eyebrow text-gold-deep">Start your order</p>
               <h2 id="activity-heading" className="mt-3 text-4xl text-navy sm:text-5xl">What did you letter in?</h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 Choose your primary activity. You can add other earned patches while building your jacket.
