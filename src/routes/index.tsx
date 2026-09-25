@@ -478,19 +478,19 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
       </header>
 
       <section className="relative min-h-[680px] overflow-hidden bg-navy-deep pt-20 lg:min-h-[760px]">
-        <div className="absolute inset-0 overflow-hidden lg:right-[40%]">
+        <div className="absolute inset-0 overflow-hidden lg:left-[40%]">
           <img
             src={albanyStudents}
             width={1536}
             height={1024}
             alt="Four Albany students wearing the school's navy, cream and gold letter jacket"
-            className="h-full w-full origin-left translate-x-[6%] scale-110 object-cover object-left"
+            className="h-full w-full scale-110 object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/45 to-navy-deep/20 lg:bg-gradient-to-r lg:from-navy-deep/40 lg:via-navy-deep/55 lg:to-navy-deep" />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/45 to-navy-deep/20 lg:bg-gradient-to-r lg:from-navy-deep lg:via-navy-deep/55 lg:to-navy-deep/15" />
         </div>
 
         <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-end px-5 pb-14 pt-16 lg:min-h-[680px] lg:grid-cols-[1.25fr_.75fr] lg:items-center lg:px-8 lg:pb-8">
-          <div className="max-w-sm lg:col-start-2 2xl:max-w-md">
+          <div className="max-w-sm lg:col-start-1 2xl:max-w-md">
             <div className="mb-5 flex items-center gap-3">
               <span className="h-px w-10 bg-brand-red" />
               <p className="font-display text-sm uppercase text-gold">Albany Lions · Class of 2027</p>
