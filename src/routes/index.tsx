@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
+import albanyJacket from "@/assets/albany-jacket.png";
+import albanyStudents from "@/assets/albany-students.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
 import JacketViewer from "@/components/jacket/JacketViewer";
 import type { JacketConfig } from "@/components/jacket/config";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,9 +36,9 @@ export const Route = createFileRoute("/")({
 
 /* ---------------- constants ---------------- */
 const SCHOOL = {
-  name: "Northstar High",
-  initials: "NS",
-  mascot: "Northstar",
+  name: "Albany H.S.",
+  initials: "A",
+  mascot: "Lions",
   activity: "Football",
   closes: "October 15",
   colors: { body: "#111B45", sleeve: "#C72A2F", trim: "#D6A928" },
@@ -106,7 +110,20 @@ const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
 const ACTIVITIES = ["Football", "Basketball", "Volleyball", "Band", "Cheer", "Soccer", "Track"];
 
+const SCHOOL_ACTIVITIES = [
+  { name: "Football", category: "Athletics", icon: Trophy },
+  { name: "Basketball", category: "Athletics", icon: Trophy },
+  { name: "Baseball", category: "Athletics", icon: Trophy },
+  { name: "Track & Field", category: "Athletics", icon: Trophy },
+  { name: "Cheer", category: "Spirit", icon: Sparkles },
+  { name: "Band", category: "Fine Arts", icon: Music2 },
+  { name: "Choir", category: "Fine Arts", icon: Music2 },
+  { name: "Theatre", category: "Fine Arts", icon: Drama },
+  { name: "Academics", category: "Academics", icon: BookOpen },
+];
+
 const ORDER: Screen[] = [
+  "school",
   "welcome",
   "student",
   "package",
@@ -136,6 +153,7 @@ const BUILD_STEPS = [
 
 /* ---------------- types ---------------- */
 type Screen =
+  | "school"
   | "welcome"
   | "student"
   | "package"
@@ -155,6 +173,7 @@ type Screen =
 
 interface OrderState {
   screen: Screen;
+  selectedActivity: string | null;
   pkg: string | null;
   sizingMethod: "photo" | "quiz" | "chart" | "measured" | null;
   size: string | null;
@@ -198,7 +217,8 @@ function money0(n: number) {
 
 function useOrderState() {
   return useState<OrderState>({
-    screen: "welcome",
+    screen: "school",
+    selectedActivity: null,
     pkg: "classic",
     sizingMethod: null,
     size: null,
@@ -422,6 +442,151 @@ function PkgChip({ state }: { state: OrderState }) {
 }
 
 /* ---------------- screens ---------------- */
+function SchoolScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
+  const [category, setCategory] = useState("All");
+  const categories = ["All", "Athletics", "Spirit", "Fine Arts", "Academics"];
+  const visibleActivities = category === "All"
+    ? SCHOOL_ACTIVITIES
+    : SCHOOL_ACTIVITIES.filter((activity) => activity.category === category);
+
+  const continueToOrder = () => {
+    if (!state.selectedActivity) return;
+    setState((current) => ({
+      ...current,
+      screen: "welcome",
+      inserts: [state.selectedActivity as string],
+    }));
+  };
+
+  return (
+    <main className="min-h-screen bg-background">
+      <header className="absolute inset-x-0 top-0 z-40 border-b border-navy-foreground/15 bg-navy-deep/55 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-4 lg:px-8">
+          <div className="flex h-10 w-10 items-center justify-center border border-gold/70 bg-brand-red font-display text-2xl text-navy-foreground">
+            A
+          </div>
+          <div className="leading-none">
+            <div className="font-display text-xl text-navy-foreground">ALBANY H.S.</div>
+            <div className="mt-1 text-[10px] font-semibold uppercase text-navy-foreground/60">Official jacket ordering</div>
+          </div>
+          <div className="ml-auto hidden text-right sm:block">
+            <div className="text-[10px] font-semibold uppercase text-gold">Ordering is open</div>
+            <div className="mt-1 text-xs text-navy-foreground/65">September 1 — October 15, 2026</div>
+          </div>
+        </div>
+      </header>
+
+      <section className="relative min-h-[680px] overflow-hidden bg-navy-deep pt-20 lg:min-h-[760px]">
+        <div className="absolute inset-0 lg:right-[40%]">
+          <img
+            src={albanyStudents}
+            width={1536}
+            height={1024}
+            alt="Four Albany students wearing the school's navy and red letter jacket"
+            className="h-full w-full object-cover object-[42%_center]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/20 to-navy-deep/5 lg:bg-gradient-to-r lg:from-navy-deep/15 lg:via-navy-deep/25 lg:to-navy-deep" />
+        </div>
+
+        <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-end px-5 pb-14 pt-16 lg:min-h-[680px] lg:grid-cols-[1.25fr_.75fr] lg:items-center lg:px-8 lg:pb-8">
+          <div className="max-w-sm lg:col-start-2 2xl:max-w-md">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-10 bg-brand-red" />
+              <p className="font-display text-sm uppercase text-gold">Albany Lions · Class of 2027</p>
+            </div>
+            <h1 className="text-6xl text-navy-foreground sm:text-7xl lg:text-[6.8rem]">
+              Your school.<br />Your <span className="text-gold">story.</span>
+            </h1>
+            <p className="mt-6 max-w-md text-base leading-relaxed text-navy-foreground/75">
+              One Albany jacket, made personal by what you earned. Choose your activity to open the official jacket and patches approved for you.
+            </p>
+            <div className="mt-8 flex items-center gap-3 border-l-2 border-brand-red pl-4 text-sm text-navy-foreground/70">
+              <span className="h-2 w-2 rounded-full bg-gold" />
+              Ordering closes October 15, 2026
+            </div>
+          </div>
+
+          <img
+            src={albanyJacket}
+            width={1024}
+            height={1280}
+            alt="Albany navy, red and gold varsity jacket"
+            className="float-anim absolute -bottom-16 -right-8 hidden w-56 drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-72"
+          />
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-1.5 bg-brand-red" />
+      </section>
+
+      <section className="relative bg-background py-14 sm:py-20" aria-labelledby="activity-heading">
+        <div className="mx-auto max-w-6xl px-5 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[18rem_1fr] lg:gap-14">
+            <div>
+              <p className="eyebrow text-brand-red">Start your order</p>
+              <h2 id="activity-heading" className="mt-3 text-4xl text-navy sm:text-5xl">What did you letter in?</h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Choose your primary activity. You can add other earned patches while building your jacket.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-2 lg:flex-col lg:items-start">
+                {categories.map((item) => (
+                  <Button
+                    key={item}
+                    type="button"
+                    variant={category === item ? "default" : "ghost"}
+                    onClick={() => setCategory(item)}
+                    className="h-9 justify-start px-4 text-xs font-semibold uppercase"
+                  >
+                    {item}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {visibleActivities.map(({ name, category: activityCategory, icon: Icon }) => {
+                  const selected = state.selectedActivity === name;
+                  return (
+                    <Button
+                      key={name}
+                      type="button"
+                      variant="outline"
+                      onClick={() => setState((current) => ({ ...current, selectedActivity: name }))}
+                      className={`h-auto min-h-20 justify-start gap-4 whitespace-normal border p-4 text-left shadow-none ${selected ? "border-gold-deep bg-gold/10 ring-1 ring-gold-deep" : "bg-card hover:border-gold-deep hover:bg-card"}`}
+                      aria-pressed={selected}
+                    >
+                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${selected ? "bg-navy text-gold" : "bg-muted text-muted-foreground"}`}>
+                        <Icon aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold text-foreground">{name}</span>
+                        <span className="mt-1 block text-xs font-normal text-muted-foreground">{activityCategory}</span>
+                      </span>
+                      <span className={`h-4 w-4 shrink-0 rounded-full border-2 ${selected ? "border-gold-deep bg-gold shadow-[inset_0_0_0_3px_var(--color-card)]" : "border-border"}`} />
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-7 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-muted-foreground">Don't see yours? Ask your school's jacket coordinator.</p>
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={continueToOrder}
+                  disabled={!state.selectedActivity}
+                  className="h-12 min-w-48 bg-gold font-bold uppercase text-gold-foreground hover:bg-gold-deep"
+                >
+                  Continue <ArrowRight aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function WelcomeScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
   return (
     <main className="min-h-screen bg-background">
@@ -440,7 +605,7 @@ function WelcomeScreen({ state, setState }: { state: OrderState; setState: React
               </div>
             </div>
             <p className="eyebrow text-brand-red">
-              Class of {state.student.grad} <span className="text-navy">· {SCHOOL.activity}</span>
+              Class of {state.student.grad} <span className="text-navy">· {state.selectedActivity || SCHOOL.activity}</span>
             </p>
             <h1 className="mt-5 text-6xl text-navy sm:text-7xl lg:text-8xl">
               Wear what
@@ -577,7 +742,7 @@ function StudentScreen({ state, setState }: { state: OrderState; setState: React
               <label className="field-label">Activity you lettered in</label>
               <select className="field-input" disabled>
                 <option>
-                  {SCHOOL.activity} (from your link)
+                  {state.selectedActivity || SCHOOL.activity} (from your school page)
                 </option>
               </select>
               <p className="mt-1 text-xs text-muted-foreground">Set by the link your coordinator sent you.</p>
@@ -1480,6 +1645,8 @@ function Index() {
   const [state, setState] = useOrderState();
 
   switch (state.screen) {
+    case "school":
+      return <SchoolScreen state={state} setState={setState} />;
     case "welcome":
       return <WelcomeScreen state={state} setState={setState} />;
     case "student":

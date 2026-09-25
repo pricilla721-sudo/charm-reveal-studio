@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Active
-- [ ] Reconsider page purpose: designed *like* a marketing site, but not a generic marketing site. The link is already sent to the student, so content should match the actual context (order landing / product page, not a brochure).
-- [ ] Prototype a general school landing page centered on real students, letter jackets, patches, and school spirit before activity selection.
-- [ ] Match the school landing prototype to the authoritative colors in the uploaded student-paperless PDF.
-- [ ] Keep the general school page activity-neutral until the student explicitly selects their activity.
+- [x] Reconsider page purpose: designed *like* a marketing site, but not a generic marketing site. The link is already sent to the student, so content should match the actual context (order landing / product page, not a brochure).
+- [x] Prototype a general school landing page centered on real students, letter jackets, patches, and school spirit before activity selection.
+- [x] Match the school landing prototype to the authoritative colors in the uploaded student-paperless PDF.
+- [x] Keep the general school page activity-neutral until the student explicitly selects their activity.
 
 ## Done
 - [x] Add a dealer salesperson catalogue view for browsing and managing all assigned products.
@@ -16,3 +16,5 @@
 
 - [x] Keep procedural jacket (user chose option 3): striped rib knit collar/cuffs/waistband, broader shoulders + tapered waist silhouette, stitched side seams, darker welt pockets
 - [ ] (deferred) Swap procedural 3D jacket for a real GLB model — blocked: needs a downloadable/licensed source (user-uploaded file or Sketchfab API token)
+
+- [x] Build the general Albany school landing page from the selected middle split direction, keeping it activity-neutral.
