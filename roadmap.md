@@ -4,6 +4,7 @@
 - [ ] Reconsider page purpose: designed *like* a marketing site, but not a generic marketing site. The link is already sent to the student, so content should match the actual context (order landing / product page, not a brochure).
 - [ ] Prototype a general school landing page centered on real students, letter jackets, patches, and school spirit before activity selection.
 - [ ] Match the school landing prototype to the authoritative colors in the uploaded student-paperless PDF.
+- [ ] Keep the general school page activity-neutral until the student explicitly selects their activity.
 
 ## Done
 - [x] Add a dealer salesperson catalogue view for browsing and managing all assigned products.
