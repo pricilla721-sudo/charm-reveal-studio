@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
-import albanyJacket from "@/assets/albany-jacket-original-palette.png";
 import albanyStudents from "@/assets/albany-students-right.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
@@ -507,13 +506,6 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             </div>
           </div>
 
-          <img
-            src={albanyJacket}
-            width={1024}
-            height={1280}
-            alt="Albany navy, cream and gold varsity jacket"
-            className="float-anim absolute -bottom-16 -right-8 hidden w-56 drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-72"
-          />
         </div>
         <div className="absolute bottom-0 inset-x-0 h-px bg-brand-red" />
       </section>
