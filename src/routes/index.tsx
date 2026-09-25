@@ -484,7 +484,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             width={1536}
             height={1024}
             alt="Four Albany students wearing the school's navy, cream and gold letter jacket"
-            className="h-full w-full object-cover object-left"
+            className="h-full w-full origin-left translate-x-[6%] scale-110 object-cover object-left"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/45 to-navy-deep/20 lg:bg-gradient-to-r lg:from-navy-deep/40 lg:via-navy-deep/55 lg:to-navy-deep" />
         </div>
