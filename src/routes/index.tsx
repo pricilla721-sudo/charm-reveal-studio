@@ -511,7 +511,7 @@ function SchoolScreen({ state, setState }: { state: OrderState; setState: React.
             width={1024}
             height={1280}
             alt="Albany navy, red and gold varsity jacket"
-            className="float-anim absolute -bottom-24 -right-20 hidden w-[34rem] drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block"
+            className="float-anim absolute -bottom-20 -right-14 hidden w-[25rem] drop-shadow-[0_38px_45px_oklch(0.08_0.04_270_/_0.55)] xl:block 2xl:-right-6 2xl:w-[29rem]"
           />
         </div>
         <div className="absolute bottom-0 inset-x-0 h-1.5 bg-brand-red" />
