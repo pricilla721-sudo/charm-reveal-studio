@@ -283,7 +283,7 @@ function SalesCatalogue() {
                 { label: "Orders", icon: ClipboardList },
                 { label: "Catalogue", icon: ShoppingBag, to: "/sales", active: true },
                 { label: "Packages", icon: Boxes },
-                { label: "Schools", icon: Building2, to: "/sales/schools" },
+                { label: "Schools", icon: Building2, to: "/schools" },
                 { label: "Totals", icon: BarChart3 },
               ].map(({ label, icon: Icon, to, active }) => {
                 const classes = `relative h-12 shrink-0 items-center gap-2 rounded-none text-sm font-medium text-primary-foreground/65 hover:bg-primary-foreground/8 hover:text-primary-foreground lg:h-auto lg:px-4 ${active ? "text-primary-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : ""}`;
