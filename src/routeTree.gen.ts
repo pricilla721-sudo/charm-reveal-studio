@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JacketTestRouteImport } from './routes/jacket-test'
 import { Route as SalesRouteImport } from './routes/sales'
+import { Route as SalesSchoolsRouteImport } from './routes/sales.schools'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,43 @@ const SalesRoute = SalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesSchoolsRoute = SalesSchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
+  getParentRoute: () => SalesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
-  '/sales': typeof SalesRoute
+  '/sales': typeof SalesRouteWithChildren
+  '/sales/schools': typeof SalesSchoolsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
-  '/sales': typeof SalesRoute
+  '/sales': typeof SalesRouteWithChildren
+  '/sales/schools': typeof SalesSchoolsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
-  '/sales': typeof SalesRoute
+  '/sales': typeof SalesRouteWithChildren
+  '/sales/schools': typeof SalesSchoolsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/jacket-test' | '/sales'
+  fullPaths: '/' | '/jacket-test' | '/sales' | '/sales/schools'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/jacket-test' | '/sales'
-  id: '__root__' | '/' | '/jacket-test' | '/sales'
+  to: '/' | '/jacket-test' | '/sales' | '/sales/schools'
+  id: '__root__' | '/' | '/jacket-test' | '/sales' | '/sales/schools'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JacketTestRoute: typeof JacketTestRoute
-  SalesRoute: typeof SalesRoute
+  SalesRoute: typeof SalesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +91,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales/schools': {
+      id: '/sales/schools'
+      path: '/schools'
+      fullPath: '/sales/schools'
+      preLoaderRoute: typeof SalesSchoolsRouteImport
+      parentRoute: typeof SalesRoute
+    }
   }
 }
+
+interface SalesRouteChildren {
+  SalesSchoolsRoute: typeof SalesSchoolsRoute
+}
+
+const SalesRouteChildren: SalesRouteChildren = {
+  SalesSchoolsRoute: SalesSchoolsRoute,
+}
+
+const SalesRouteWithChildren = SalesRoute._addFileChildren(SalesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JacketTestRoute: JacketTestRoute,
-  SalesRoute: SalesRoute,
+  SalesRoute: SalesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
