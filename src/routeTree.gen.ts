@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JacketTestRouteImport } from './routes/jacket-test'
 import { Route as SalesRouteImport } from './routes/sales'
+import { Route as SchoolsRouteImport } from './routes/schools'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const SalesRoute = SalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SchoolsRoute = SchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
   '/sales': typeof SalesRoute
+  '/schools': typeof SchoolsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
   '/sales': typeof SalesRoute
+  '/schools': typeof SchoolsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/jacket-test': typeof JacketTestRoute
   '/sales': typeof SalesRoute
+  '/schools': typeof SchoolsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/jacket-test' | '/sales'
+  fullPaths: '/' | '/jacket-test' | '/sales' | '/schools'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/jacket-test' | '/sales'
-  id: '__root__' | '/' | '/jacket-test' | '/sales'
+  to: '/' | '/jacket-test' | '/sales' | '/schools'
+  id: '__root__' | '/' | '/jacket-test' | '/sales' | '/schools'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JacketTestRoute: typeof JacketTestRoute
   SalesRoute: typeof SalesRoute
+  SchoolsRoute: typeof SchoolsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/schools': {
+      id: '/schools'
+      path: '/schools'
+      fullPath: '/schools'
+      preLoaderRoute: typeof SchoolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JacketTestRoute: JacketTestRoute,
   SalesRoute: SalesRoute,
+  SchoolsRoute: SchoolsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

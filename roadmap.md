@@ -7,6 +7,7 @@
 - [x] Keep the general school page activity-neutral until the student explicitly selects their activity.
 
 ## Done
+- [x] Add a rep-side schools list at /schools (assigned schools with orders, revenue, take rate, season status; list/grid views, search, filters, sorting) linked from the sales nav.
 - [x] Add a dealer salesperson catalogue view for browsing and managing all assigned products.
 - [x] Restyle the order flow around the dealer business card: navy-led palette, red structure, white fields, retained gold accents, and navy/red jacket colors.
 - [x] Remove "Why the form had to go" section.
