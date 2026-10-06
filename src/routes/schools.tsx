@@ -165,7 +165,7 @@ function SchoolsPage() {
               { label: "Orders", icon: ClipboardList },
               { label: "Catalogue", icon: ShoppingBag, to: "/sales" },
               { label: "Packages", icon: Boxes },
-              { label: "Schools", icon: Building2, to: "/sales/schools", active: true },
+              { label: "Schools", icon: Building2, to: "/schools", active: true },
               { label: "Totals", icon: BarChart3 },
             ].map(({ label, icon: Icon, to, active }) => {
               const classes = cn(
