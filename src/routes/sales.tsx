@@ -281,22 +281,25 @@ function SalesCatalogue() {
             <nav className="order-3 flex w-full items-stretch gap-1 overflow-x-auto border-t border-primary-foreground/10 lg:order-2 lg:w-auto lg:flex-1 lg:self-stretch lg:border-t-0" aria-label="Sales areas">
               {[
                 { label: "Orders", icon: ClipboardList },
-                { label: "Catalogue", icon: ShoppingBag, active: true },
+                { label: "Catalogue", icon: ShoppingBag, to: "/sales", active: true },
                 { label: "Packages", icon: Boxes },
-                { label: "Schools", icon: Building2 },
+                { label: "Schools", icon: Building2, to: "/sales/schools" },
                 { label: "Totals", icon: BarChart3 },
-              ].map(({ label, icon: Icon, active }) => (
-                <Button
-                  key={label}
-                  type="button"
-                  variant="ghost"
-                  className={`relative h-12 shrink-0 rounded-none px-3 text-primary-foreground/65 hover:bg-primary-foreground/8 hover:text-primary-foreground lg:h-auto lg:px-4 ${active ? "text-primary-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : ""}`}
-                  aria-current={active ? "page" : undefined}
-                >
-                  <Icon className={active ? "text-gold" : ""} />
-                  <span>{label}</span>
-                </Button>
-              ))}
+              ].map(({ label, icon: Icon, to, active }) => {
+                const classes = `relative h-12 shrink-0 items-center gap-2 rounded-none text-sm font-medium text-primary-foreground/65 hover:bg-primary-foreground/8 hover:text-primary-foreground lg:h-auto lg:px-4 ${active ? "text-primary-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : ""}`;
+                const icon = <Icon className={active ? "text-gold" : ""} />;
+                return to ? (
+                  <Link key={label} to={to} className={`${classes} flex`} aria-current={active ? "page" : undefined}>
+                    {icon}
+                    <span>{label}</span>
+                  </Link>
+                ) : (
+                  <Button key={label} type="button" variant="ghost" className={classes} aria-current={active ? "page" : undefined}>
+                    {icon}
+                    <span>{label}</span>
+                  </Button>
+                );
+              })}
             </nav>
           </div>
         </header>
