@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Drama, Music2, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, BookOpen, Check, ChevronLeft, Drama, Maximize2, Minimize2, Music2, Sparkles, Trophy } from "lucide-react";
 import albanyStudents from "@/assets/albany-students-right.jpg";
 import jacketCutout from "@/assets/jacket-cutout-business-card.png";
 import dealerLogoAsset from "@/assets/all-star-letter-jackets.png.asset.json";
-import JacketViewer from "@/components/jacket/JacketViewer";
+import JacketViewer, { type JacketView } from "@/components/jacket/JacketViewer";
 import type { JacketConfig } from "@/components/jacket/config";
 import { Button } from "@/components/ui/button";
 
@@ -131,24 +131,22 @@ const ORDER: Screen[] = [
   "sizing-quiz",
   "sizing-chart",
   "size-result",
-  "build-sleeves",
-  "build-letter",
-  "build-patches",
-  "build-mono",
-  "build-placement",
+  "build",
   "build-review",
   "checkout",
   "confirmed",
 ];
 
-const BUILD_STEPS = [
-  { id: "build-sleeves", label: "Sleeves" },
-  { id: "build-letter", label: "Letter & year" },
-  { id: "build-patches", label: "Patches" },
-  { id: "build-mono", label: "Monogram & name" },
-  { id: "build-placement", label: "Placement" },
-  { id: "build-review", label: "Review" },
-];
+/** sections of the one-page jacket builder, in scroll order */
+const BUILD_SECTIONS = [
+  { id: "upgrades", label: "Upgrades" },
+  { id: "letter", label: "Your letter" },
+  { id: "patches", label: "Patches" },
+  { id: "monogram", label: "Monogram & name" },
+  { id: "placement", label: "Placement" },
+  { id: "summary", label: "Summary" },
+] as const;
+type SectionId = (typeof BUILD_SECTIONS)[number]["id"];
 
 /* ---------------- types ---------------- */
 type Screen =
@@ -161,17 +159,15 @@ type Screen =
   | "sizing-quiz"
   | "sizing-chart"
   | "size-result"
-  | "build-sleeves"
-  | "build-letter"
-  | "build-patches"
-  | "build-mono"
-  | "build-placement"
+  | "build"
   | "build-review"
   | "checkout"
   | "confirmed";
 
 interface OrderState {
   screen: Screen;
+  /** builder section to scroll to when (re)entering the builder */
+  jumpTo: SectionId | null;
   selectedActivity: string | null;
   pkg: string | null;
   sizingMethod: "photo" | "quiz" | "chart" | "measured" | null;
@@ -217,6 +213,7 @@ function money0(n: number) {
 function useOrderState() {
   return useState<OrderState>({
     screen: "school",
+    jumpTo: null,
     selectedActivity: null,
     pkg: "classic",
     sizingMethod: null,
@@ -301,10 +298,10 @@ function prevScreen(state: OrderState): Screen {
 }
 
 /* ---------------- shared chrome ---------------- */
-function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
+function AppBar({ sub, inverse, sticky = true }: { sub?: string; inverse?: boolean; sticky?: boolean }) {
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur ${
+      className={`${sticky ? "sticky top-0 z-50" : "relative"} backdrop-blur ${
         inverse
           ? "border-b border-white/10 bg-navy-deep/60"
           : "border-b border-border/70 bg-background/85"
@@ -338,21 +335,22 @@ function AppBar({ sub, inverse }: { sub?: string; inverse?: boolean }) {
   );
 }
 
-function Stepper({ current }: { current: string }) {
-  const i = BUILD_STEPS.findIndex((s) => s.id === current);
+/** review-page links back into the builder sections */
+function ReviewNav({ setState }: { setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
   return (
-    <nav className="stepper" aria-label="Jacket builder steps">
-      {BUILD_STEPS.map((s, n) => (
-        <div
+    <nav className="stepper" aria-label="Edit jacket sections">
+      {BUILD_SECTIONS.filter((s) => s.id !== "summary").map((s) => (
+        <button
           key={s.id}
-          className={`stepper-step ${n === i ? "stepper-step-active" : ""} ${n < i ? "stepper-step-done" : ""}`}
+          type="button"
+          onClick={() => setState((st) => ({ ...st, screen: "build", jumpTo: s.id }))}
+          className="stepper-step stepper-step-done rounded-full border border-border bg-card px-3 py-1.5 hover:border-gold-deep"
         >
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-bold">
-            {n < i ? "✓" : n + 1}
-          </span>
-          <span dangerouslySetInnerHTML={{ __html: s.label }} />
-        </div>
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+          {s.label}
+        </button>
       ))}
+      <span className="stepper-step stepper-step-active rounded-full border border-gold-deep bg-gold/10 px-3 py-1.5">Review</span>
     </nav>
   );
 }
@@ -1012,331 +1010,566 @@ function SizeResultScreen({ state, setState }: { state: OrderState; setState: Re
   );
 }
 
-function BuildSleevesScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
+/* ---------------- one-page jacket builder ---------------- */
+type SetOrder = React.Dispatch<React.SetStateAction<OrderState>>;
+
+function addOnPrice(state: OrderState, key: string, price: number) {
+  const P = PACKAGES.find((p) => p.id === state.pkg);
+  return P && P.inc.includes(key) ? "Included" : "+" + money0(price);
+}
+
+function OptionCard({
+  selected,
+  title,
+  desc,
+  price,
+  onClick,
+}: {
+  selected: boolean;
+  title: string;
+  desc: string;
+  price?: string;
+  onClick: () => void;
+}) {
   return (
-    <main className="min-h-screen pb-24">
-      <AppBar sub="Step 4 of 4 — build your jacket" />
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-sleeves" />
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
-          <div>
-            <h2 className="text-4xl sm:text-5xl">Sleeves</h2>
-            <div className="mt-8 space-y-4">
-              {[
-                ["vinyl", "Vinyl raglan sleeves", "Standard on most jackets."],
-                ["leather", "Leather sleeves", "Premium upgrade."],
-              ].map(([key, title, desc]) => {
-                const selected = state.sleeves === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setState((s) => ({ ...s, sleeves: key as "vinyl" | "leather" }))}
-                    className={`opt ${selected ? "opt-selected" : ""}`}
-                  >
-                    <span className={`radio ${selected ? "radio-checked" : ""}`} />
-                    <span className="flex-1">
-                      <span className="block text-base font-semibold">{title}</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">{desc}</span>
-                    </span>
-                  </button>
-                );
-              })}
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.sailor}
-                  onChange={(e) => setState((s) => ({ ...s, sailor: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Add sailor collar (+{money0(PRICE.sailor)})</span>
-              </label>
-            </div>
-          </div>
-          <MobilePreview state={state} />
-        </div>
-      </div>
-      <ActionBar state={state} setState={setState} nextLabel="Continue" />
-    </main>
+    <button type="button" onClick={onClick} aria-pressed={selected} className={`opt ${selected ? "opt-selected" : ""}`}>
+      <span className={`radio ${selected ? "radio-checked" : ""}`} />
+      <span className="flex-1">
+        <span className="block text-base font-semibold">{title}</span>
+        <span className="mt-1 block text-sm text-muted-foreground">{desc}</span>
+      </span>
+      {price && (
+        <span className={`shrink-0 text-sm font-semibold ${price === "Included" ? "text-ok" : "text-foreground"}`}>{price}</span>
+      )}
+    </button>
   );
 }
 
-function BuildLetterScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
+function ToggleRow({
+  checked,
+  label,
+  price,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  price?: string;
+  onChange: (v: boolean) => void;
+}) {
   return (
-    <main className="min-h-screen pb-24">
-      <AppBar sub="Step 4 of 4 — build your jacket" />
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-letter" />
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
-          <div>
-            <h2 className="text-4xl sm:text-5xl">Letter & year</h2>
-            <div className="mt-8 space-y-4">
-              {[
-                ["make", "Make my letter", "We'll produce the chenille letter and sew it on."],
-                ["included", "My letter is included", "Your activity already provided the letter."],
-                ["loose", "Loose letter", "We'll include the letter unattached."],
-                ["none", "No letter", "Skip the letter entirely."],
-              ].map(([key, title, desc]) => {
-                const selected = state.letter === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setState((s) => ({ ...s, letter: key as OrderState["letter"] }))}
-                    className={`opt ${selected ? "opt-selected" : ""}`}
-                  >
-                    <span className={`radio ${selected ? "radio-checked" : ""}`} />
-                    <span className="flex-1">
-                      <span className="block text-base font-semibold">{title}</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">{desc}</span>
-                    </span>
-                  </button>
-                );
-              })}
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.year}
-                  onChange={(e) => setState((s) => ({ ...s, year: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Add graduation year patch</span>
-              </label>
-              {state.year && (
-                <select
-                  className="field-input"
-                  value={state.yearStyle}
-                  onChange={(e) => setState((s) => ({ ...s, yearStyle: e.target.value }))}
-                >
-                  <option>Block</option>
-                  <option>Script</option>
-                </select>
-              )}
-            </div>
-          </div>
-          <MobilePreview state={state} />
-        </div>
-      </div>
-      <ActionBar state={state} setState={setState} nextLabel="Continue" />
-    </main>
+    <label
+      className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-card p-4 transition ${
+        checked ? "border-gold-deep shadow-[0_0_0_1px_var(--color-gold-deep)]" : "border-border"
+      }`}
+    >
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-5 w-5 accent-gold-deep" />
+      <span className="flex-1 text-sm font-semibold">{label}</span>
+      {price && <span className={`text-sm font-semibold ${price === "Included" ? "text-ok" : "text-muted-foreground"}`}>{price}</span>}
+    </label>
   );
 }
 
-function BuildPatchesScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
-  const toggleInsert = (act: string) => {
+function BuildSection({
+  id,
+  index,
+  title,
+  blurb,
+  children,
+}: {
+  id: SectionId;
+  index: number;
+  title: string;
+  blurb: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={`section-${id}`} aria-labelledby={`section-${id}-title`} className="border-b border-border py-10 last:border-b-0 lg:py-14">
+      <div className="flex items-center gap-3">
+        <span className="h-px w-6 bg-brand-red" aria-hidden="true" />
+        <span className="eyebrow text-muted-foreground">
+          {String(index + 1).padStart(2, "0")} / {String(BUILD_SECTIONS.length).padStart(2, "0")}
+        </span>
+      </div>
+      <h2 id={`section-${id}-title`} className="mt-3 text-4xl sm:text-5xl">
+        {title}
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{blurb}</p>
+      <div className="mt-6 space-y-3">{children}</div>
+    </section>
+  );
+}
+
+function BuilderScreen({ state, setState }: { state: OrderState; setState: SetOrder }) {
+  const [active, setActive] = useState<SectionId>(BUILD_SECTIONS[0].id);
+  const [view, setView] = useState<JacketView>("front");
+  const [compact, setCompact] = useState(false);
+  const mobileStickyRef = useRef<HTMLDivElement>(null);
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const chipRowRef = useRef<HTMLDivElement>(null);
+  const set = (patch: Partial<OrderState>) => setState((s) => ({ ...s, ...patch }));
+  const activeIndex = BUILD_SECTIONS.findIndex((s) => s.id === active);
+  const P = PACKAGES.find((p) => p.id === state.pkg);
+
+  // height of whatever is pinned to the top of the viewport (jacket on mobile, section bar on desktop)
+  const stickyOffset = useCallback(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    const el = desktop ? desktopNavRef.current : mobileStickyRef.current;
+    return el ? el.getBoundingClientRect().height : 0;
+  }, []);
+
+  const jump = useCallback(
+    (id: SectionId, smooth = true) => {
+      const el = document.getElementById(`section-${id}`);
+      if (!el) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const top = el.getBoundingClientRect().top + window.scrollY - stickyOffset() + 1;
+      window.scrollTo({ top, behavior: smooth && !reduce ? "smooth" : "auto" });
+    },
+    [stickyOffset],
+  );
+
+  // scroll-spy: highlight the section currently under the pinned header
+  useEffect(() => {
+    const onScroll = () => {
+      const line = stickyOffset() + 96;
+      let current: SectionId = BUILD_SECTIONS[0].id;
+      for (const s of BUILD_SECTIONS) {
+        const el = document.getElementById(`section-${s.id}`);
+        if (el && el.getBoundingClientRect().top <= line) current = s.id;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        current = "summary";
+      }
+      setActive(current);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [stickyOffset]);
+
+  // arriving from the review page with a section to edit
+  useEffect(() => {
+    if (!state.jumpTo) return;
+    const target = state.jumpTo;
+    requestAnimationFrame(() => jump(target, false));
+    setState((s) => ({ ...s, jumpTo: null }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // keep the active chip visible in the mobile chip row
+  useEffect(() => {
+    const row = chipRowRef.current;
+    const chip = row?.querySelector<HTMLElement>(`[data-section="${active}"]`);
+    if (!row || !chip) return;
+    row.scrollTo({ left: chip.offsetLeft - row.clientWidth / 2 + chip.clientWidth / 2, behavior: "smooth" });
+  }, [active]);
+
+  const goReview = () => setState((s) => ({ ...s, screen: "build-review" }));
+  const goBack = () => setState((s) => ({ ...s, screen: "size-result" }));
+
+  const toggleInsert = (act: string) =>
     setState((s) => ({
       ...s,
       inserts: s.inserts.includes(act) ? s.inserts.filter((i) => i !== act) : [...s.inserts, act],
     }));
+
+  const sectionLink = (s: (typeof BUILD_SECTIONS)[number], n: number, variant: "chip" | "tab") => {
+    const isActive = s.id === active;
+    const done = n < activeIndex;
+    const base =
+      variant === "chip"
+        ? `inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+            isActive
+              ? "border-navy bg-navy text-navy-foreground"
+              : "border-border bg-card text-muted-foreground hover:text-foreground"
+          }`
+        : `relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-5 text-sm font-semibold transition xl:px-4 ${
+            isActive
+              ? "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold-deep"
+              : "text-muted-foreground hover:text-foreground"
+          }`;
+    return (
+      <a
+        key={s.id}
+        href={`#section-${s.id}`}
+        data-section={s.id}
+        aria-current={isActive ? "true" : undefined}
+        onClick={(e) => {
+          e.preventDefault();
+          jump(s.id);
+        }}
+        className={base}
+      >
+        {done && <Check className={`h-3.5 w-3.5 ${isActive ? "" : "text-ok"}`} aria-hidden="true" />}
+        {s.label}
+      </a>
+    );
   };
+
   return (
-    <main className="min-h-screen pb-24">
-      <AppBar sub="Step 4 of 4 — build your jacket" />
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-patches" />
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
-          <div>
-            <h2 className="text-4xl sm:text-5xl">Patches</h2>
-            <div className="mt-8 space-y-6">
+    <main className="min-h-screen bg-background pb-28 lg:pb-0">
+      <AppBar sub="Step 4 of 4 — build your jacket" sticky={false} />
+
+      {/* desktop: section links pinned under the app bar */}
+      <div
+        ref={desktopNavRef}
+        className="sticky top-0 z-40 hidden border-b border-border/70 bg-background/90 backdrop-blur lg:block"
+      >
+        <div className="mx-auto flex max-w-[90rem] items-center gap-4 px-8">
+          <button
+            type="button"
+            onClick={goBack}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Size
+          </button>
+          <nav className="flex flex-1 justify-center" aria-label="Jacket sections">
+            {BUILD_SECTIONS.map((s, n) => sectionLink(s, n, "tab"))}
+          </nav>
+          <div className="text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Total</div>
+            <div className="font-display text-2xl leading-none text-navy">{money(total(state))}</div>
+          </div>
+          <button
+            type="button"
+            onClick={goReview}
+            className="rounded-lg px-5 py-2.5 text-sm font-semibold text-gold-foreground"
+            style={{ background: "var(--gradient-gold)" }}
+          >
+            Review order
+          </button>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[90rem] lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:px-8">
+        {/* jacket: pinned to the top on mobile, pinned to the right on desktop */}
+        <aside
+          ref={mobileStickyRef}
+          className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur lg:order-2 lg:top-16 lg:z-0 lg:h-[calc(100svh-4rem)] lg:self-start lg:border-b-0 lg:bg-transparent lg:py-6 lg:backdrop-blur-none"
+        >
+          <div className="relative px-3 pt-3 lg:flex lg:h-full lg:flex-col lg:p-0">
+            <JacketViewer
+              cfg={jacketConfig(state)}
+              view={view}
+              onViewChange={setView}
+              overlayControls
+              showCredit={false}
+              className="lg:min-h-0 lg:flex-1"
+              stageClassName={`transition-[height] duration-300 lg:h-full lg:rounded-2xl ${compact ? "h-[20svh]" : "h-[36svh]"}`}
+            />
+            <button
+              type="button"
+              onClick={() => setCompact((c) => !c)}
+              aria-label={compact ? "Enlarge jacket preview" : "Shrink jacket preview"}
+              className="absolute left-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-card/85 text-foreground shadow-[var(--shadow-card)] backdrop-blur lg:hidden"
+            >
+              {compact ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+            </button>
+            <div className="hidden items-end justify-between gap-6 pt-5 lg:flex">
               <div>
-                <h3 className="text-base font-semibold">Activity inserts</h3>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {ACTIVITIES.map((act) => {
-                    const selected = state.inserts.includes(act);
-                    return (
-                      <button
-                        key={act}
-                        onClick={() => toggleInsert(act)}
-                        className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                          selected ? "border-gold-deep bg-gold/10 text-navy" : "border-border bg-card text-foreground hover:border-gold-deep"
-                        }`}
-                      >
-                        {act}
-                      </button>
-                    );
-                  })}
+                <div className="eyebrow text-muted-foreground">{SCHOOL.name} · {state.selectedActivity || SCHOOL.activity}</div>
+                <div className="mt-1 font-display text-2xl uppercase leading-none xl:text-3xl">
+                  {P ? `${P.name} letter jacket` : "Custom letter jacket"}
                 </div>
               </div>
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.mascotPatch}
-                  onChange={(e) => setState((s) => ({ ...s, mascotPatch: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Mascot patch on sleeve</span>
-              </label>
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.number}
-                  onChange={(e) => setState((s) => ({ ...s, number: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Jersey number</span>
-              </label>
-              {state.number && (
-                <input
-                  className="field-input"
-                  placeholder="##"
-                  value={state.numberVal}
-                  onChange={(e) => setState((s) => ({ ...s, numberVal: e.target.value }))}
-                />
-              )}
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.position}
-                  onChange={(e) => setState((s) => ({ ...s, position: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Position patch</span>
-              </label>
-              {state.position && (
-                <input
-                  className="field-input"
-                  placeholder="Position"
-                  value={state.positionVal}
-                  onChange={(e) => setState((s) => ({ ...s, positionVal: e.target.value }))}
-                />
-              )}
+              <p className="max-w-[16rem] text-right text-[10px] text-muted-foreground/70">
+                3D model: “Varsity Jacket” by 3DEE via Sketchfab (CC-BY)
+              </p>
             </div>
           </div>
-          <MobilePreview state={state} />
-        </div>
-      </div>
-      <ActionBar state={state} setState={setState} nextLabel="Continue" />
-    </main>
-  );
-}
+          {/* mobile: section chips sit under the jacket so they stay reachable */}
+          <nav
+            ref={chipRowRef}
+            aria-label="Jacket sections"
+            className="flex gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
+          >
+            {BUILD_SECTIONS.map((s, n) => sectionLink(s, n, "chip"))}
+          </nav>
+        </aside>
 
-function BuildMonoScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
-  return (
-    <main className="min-h-screen pb-24">
-      <AppBar sub="Step 4 of 4 — build your jacket" />
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-mono" />
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
-          <div>
-            <h2 className="text-4xl sm:text-5xl">Monogram & name</h2>
-            <div className="mt-8 space-y-5">
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.mono}
-                  onChange={(e) => setState((s) => ({ ...s, mono: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Chest monogram</span>
-              </label>
-              {state.mono && (
-                <>
-                  <input
-                    className="field-input"
-                    placeholder="First or last name"
-                    value={state.monoText}
-                    onChange={(e) => setState((s) => ({ ...s, monoText: e.target.value }))}
-                  />
-                  <select
-                    className="field-input"
-                    value={state.monoStyle}
-                    onChange={(e) => setState((s) => ({ ...s, monoStyle: e.target.value }))}
-                  >
-                    <option>Script</option>
-                    <option>Block</option>
-                  </select>
-                </>
-              )}
-              <label className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <input
-                  type="checkbox"
-                  checked={state.backName}
-                  onChange={(e) => setState((s) => ({ ...s, backName: e.target.checked }))}
-                  className="h-5 w-5 accent-gold-deep"
-                />
-                <span className="text-sm font-semibold">Back name</span>
-              </label>
-              {state.backName && (
-                <>
-                  <input
-                    className="field-input"
-                    placeholder="Last name"
-                    value={state.backNameL1}
-                    onChange={(e) => setState((s) => ({ ...s, backNameL1: e.target.value }))}
-                  />
-                  <input
-                    className="field-input"
-                    placeholder="Second line (optional)"
-                    value={state.backNameL2}
-                    onChange={(e) => setState((s) => ({ ...s, backNameL2: e.target.value }))}
-                  />
-                  <select
-                    className="field-input"
-                    value={state.backNameStyle}
-                    onChange={(e) => setState((s) => ({ ...s, backNameStyle: e.target.value }))}
-                  >
-                    <option>Script</option>
-                    <option>Block</option>
-                  </select>
-                </>
-              )}
-            </div>
+        {/* options: one continuous scroll */}
+        <div className="px-5 sm:px-8 lg:order-1 lg:px-0 lg:pb-[30vh]">
+          <button
+            type="button"
+            onClick={goBack}
+            className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground lg:hidden"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Back to size
+          </button>
+          <div className="mt-4 lg:mt-10">
+            <PkgChip state={state} />
           </div>
-          <MobilePreview state={state} />
-        </div>
-      </div>
-      <ActionBar state={state} setState={setState} nextLabel="Continue" />
-    </main>
-  );
-}
 
-function BuildPlacementScreen({ state, setState }: { state: OrderState; setState: React.Dispatch<React.SetStateAction<OrderState>> }) {
-  return (
-    <main className="min-h-screen pb-24">
-      <AppBar sub="Step 4 of 4 — build your jacket" />
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-placement" />
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
-          <div>
-            <h2 className="text-4xl sm:text-5xl">Placement</h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Standard placement follows your school's spec. Use the note only if you have a documented exception.
+          <BuildSection id="upgrades" index={0} title="Upgrades" blurb="Choose the sleeve material and collar for your jacket.">
+            <OptionCard
+              selected={state.sleeves === "vinyl"}
+              title="Vinyl raglan sleeves"
+              desc="Standard on most jackets."
+              price="Included"
+              onClick={() => set({ sleeves: "vinyl" })}
+            />
+            <OptionCard
+              selected={state.sleeves === "leather"}
+              title="Leather sleeves"
+              desc="Premium upgrade with a softer hand and richer sheen."
+              price={addOnPrice(state, "leather", PRICE.leather)}
+              onClick={() => set({ sleeves: "leather" })}
+            />
+            <ToggleRow
+              checked={state.sailor}
+              label="Sailor collar"
+              price={"+" + money0(PRICE.sailor)}
+              onChange={(v) => set({ sailor: v })}
+            />
+          </BuildSection>
+
+          <BuildSection id="letter" index={1} title="Your letter" blurb="Your chenille award letter and graduation year.">
+            {(
+              [
+                ["make", "Make my letter", "We'll produce the chenille letter and sew it on."],
+                ["included", "My letter is included", "Your activity already provided the letter."],
+                ["loose", "Loose letter", "We'll include the letter unattached."],
+                ["none", "No letter", "Skip the letter entirely."],
+              ] as const
+            ).map(([key, title, desc]) => (
+              <OptionCard
+                key={key}
+                selected={state.letter === key}
+                title={title}
+                desc={desc}
+                onClick={() => {
+                  set({ letter: key });
+                  setView("front");
+                }}
+              />
+            ))}
+            <ToggleRow
+              checked={state.year}
+              label="Graduation year patch"
+              price={addOnPrice(state, "year", PRICE.year)}
+              onChange={(v) => set({ year: v })}
+            />
+            {state.year && (
+              <select className="field-input" aria-label="Year patch style" value={state.yearStyle} onChange={(e) => set({ yearStyle: e.target.value })}>
+                <option>Block</option>
+                <option>Script</option>
+              </select>
+            )}
+          </BuildSection>
+
+          <BuildSection id="patches" index={2} title="Patches" blurb="Activity inserts, mascot and numbers for your sleeves.">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-sans text-sm font-semibold normal-case">Activity inserts</h3>
+                <span className="text-xs text-muted-foreground">
+                  {P && P.inc.includes("insert1") ? "1st included · " : ""}+{money0(PRICE.insert)} each
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {ACTIVITIES.map((act) => {
+                  const selected = state.inserts.includes(act);
+                  return (
+                    <button
+                      key={act}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => toggleInsert(act)}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                        selected ? "border-gold-deep bg-gold/10 text-navy" : "border-border bg-card text-foreground hover:border-gold-deep"
+                      }`}
+                    >
+                      {act}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <ToggleRow
+              checked={state.mascotPatch}
+              label="Mascot patch on sleeve"
+              price={addOnPrice(state, "mascot", PRICE.mascot)}
+              onChange={(v) => set({ mascotPatch: v })}
+            />
+            <ToggleRow
+              checked={state.number}
+              label="Jersey number"
+              price={addOnPrice(state, "number", PRICE.number)}
+              onChange={(v) => set({ number: v })}
+            />
+            {state.number && (
+              <input
+                className="field-input"
+                aria-label="Jersey number"
+                placeholder="##"
+                inputMode="numeric"
+                value={state.numberVal}
+                onChange={(e) => set({ numberVal: e.target.value })}
+              />
+            )}
+            <ToggleRow
+              checked={state.position}
+              label="Position patch"
+              price={"+" + money0(PRICE.position)}
+              onChange={(v) => set({ position: v })}
+            />
+            {state.position && (
+              <input
+                className="field-input"
+                aria-label="Position"
+                placeholder="Position"
+                value={state.positionVal}
+                onChange={(e) => set({ positionVal: e.target.value })}
+              />
+            )}
+          </BuildSection>
+
+          <BuildSection id="monogram" index={3} title="Monogram & name" blurb="Your name on the chest, and optionally across the back.">
+            <ToggleRow
+              checked={state.mono}
+              label="Chest monogram"
+              price={addOnPrice(state, "mono", PRICE.mono)}
+              onChange={(v) => {
+                set({ mono: v });
+                setView("front");
+              }}
+            />
+            {state.mono && (
+              <div className="grid gap-3 sm:grid-cols-[1fr_9rem]">
+                <input
+                  className="field-input"
+                  aria-label="Monogram text"
+                  placeholder="First or last name"
+                  value={state.monoText}
+                  onFocus={() => setView("front")}
+                  onChange={(e) => set({ monoText: e.target.value })}
+                />
+                <select className="field-input" aria-label="Monogram style" value={state.monoStyle} onChange={(e) => set({ monoStyle: e.target.value })}>
+                  <option>Script</option>
+                  <option>Block</option>
+                </select>
+              </div>
+            )}
+            <ToggleRow
+              checked={state.backName}
+              label="Back name"
+              price={addOnPrice(state, "backname", PRICE.backname)}
+              onChange={(v) => {
+                set({ backName: v });
+                setView(v ? "back" : "front");
+              }}
+            />
+            {state.backName && (
+              <div className="space-y-3">
+                <input
+                  className="field-input"
+                  aria-label="Back name, line 1"
+                  placeholder="Last name"
+                  value={state.backNameL1}
+                  onFocus={() => setView("back")}
+                  onChange={(e) => set({ backNameL1: e.target.value })}
+                />
+                <input
+                  className="field-input"
+                  aria-label="Back name, line 2"
+                  placeholder={`Second line (optional, +${money0(PRICE.backname2)})`}
+                  value={state.backNameL2}
+                  onFocus={() => setView("back")}
+                  onChange={(e) => set({ backNameL2: e.target.value })}
+                />
+                <select className="field-input" aria-label="Back name style" value={state.backNameStyle} onChange={(e) => set({ backNameStyle: e.target.value })}>
+                  <option>Script</option>
+                  <option>Block</option>
+                </select>
+              </div>
+            )}
+          </BuildSection>
+
+          <BuildSection
+            id="placement"
+            index={4}
+            title="Placement"
+            blurb="Standard placement follows your school's spec. Use the note only if you have a documented exception."
+          >
+            <OptionCard
+              selected={state.placement === "standard"}
+              title="Standard placement"
+              desc="Follow the school-approved spec for every patch."
+              onClick={() => set({ placement: "standard" })}
+            />
+            <OptionCard
+              selected={state.placement === "custom"}
+              title="Custom placement"
+              desc="I'll describe where something should go differently."
+              onClick={() => set({ placement: "custom" })}
+            />
+            {state.placement === "custom" && (
+              <textarea
+                className="field-input min-h-[100px]"
+                aria-label="Placement note"
+                placeholder="Describe the placement exception..."
+                value={state.placementNote}
+                onChange={(e) => set({ placementNote: e.target.value })}
+              />
+            )}
+          </BuildSection>
+
+          <BuildSection id="summary" index={5} title="Summary" blurb="Everything on your jacket so far. Tap any section above to change it.">
+            <div className="card-elevated p-5 sm:p-6">
+              <ul className="space-y-2 text-sm">
+                {lineItems(state).map((l) => (
+                  <li key={l.k} className="flex justify-between gap-3">
+                    <span className={l.inc ? "text-muted-foreground" : ""}>{l.k}</span>
+                    <span className={`shrink-0 ${l.inc ? "text-ok" : ""}`}>{l.inc ? "Included" : money(l.v)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Estimated tax</span>
+                  <span>{money(tax(state))}</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="font-semibold">Total</span>
+                  <span className="font-display text-3xl leading-none text-navy">{money(total(state))}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={goReview}
+                className="mt-6 w-full rounded-lg px-6 py-3.5 text-sm font-semibold text-gold-foreground"
+                style={{ background: "var(--gradient-gold)" }}
+              >
+                Review &amp; send for approval
+              </button>
+            </div>
+            <p className="pt-2 text-center text-[10px] text-muted-foreground/70 lg:hidden">
+              3D model: “Varsity Jacket” by 3DEE via Sketchfab (CC-BY)
             </p>
-            <div className="mt-8 space-y-4">
-              {(
-                [
-                  ["standard", "Standard placement", "Follow the school-approved spec for every patch."],
-                  ["custom", "Custom placement", "I'll describe where something should go differently."],
-                ] as const
-              ).map(([key, title, desc]) => {
-
-                const selected = state.placement === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setState((s) => ({ ...s, placement: key }))}
-                    className={`opt ${selected ? "opt-selected" : ""}`}
-                  >
-                    <span className={`radio ${selected ? "radio-checked" : ""}`} />
-                    <span className="flex-1">
-                      <span className="block text-base font-semibold">{title}</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">{desc}</span>
-                    </span>
-                  </button>
-                );
-              })}
-              {state.placement === "custom" && (
-                <textarea
-                  className="field-input min-h-[100px]"
-                  placeholder="Describe the placement exception..."
-                  value={state.placementNote}
-                  onChange={(e) => setState((s) => ({ ...s, placementNote: e.target.value }))}
-                />
-              )}
-            </div>
-          </div>
-          <MobilePreview state={state} />
+          </BuildSection>
         </div>
       </div>
-      <ActionBar state={state} setState={setState} nextLabel="Review order" />
+
+      {/* mobile: total + review always within thumb reach */}
+      <div className="lg:hidden">
+        <div className="mbar">
+          <div>
+            <div className="text-xs text-muted-foreground">Total</div>
+            <div className="font-display text-2xl text-navy">{money(total(state))}</div>
+          </div>
+          <button
+            type="button"
+            onClick={goReview}
+            className="rounded-lg px-5 py-2.5 text-sm font-semibold text-gold-foreground"
+            style={{ background: "var(--gradient-gold)" }}
+          >
+            Review order
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
@@ -1347,7 +1580,7 @@ function BuildReviewScreen({ state, setState }: { state: OrderState; setState: R
     <main className="min-h-screen pb-24">
       <AppBar sub="Review your jacket" />
       <div className="mx-auto max-w-6xl px-6 py-8">
-        <Stepper current="build-review" />
+        <ReviewNav setState={setState} />
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
           <div>
             <h2 className="text-4xl sm:text-5xl">Review</h2>
@@ -1637,6 +1870,13 @@ function ActionBar({
 function Index() {
   const [state, setState] = useOrderState();
 
+  // each step starts at the top, unless we're jumping back into a builder section
+  useEffect(() => {
+    if (state.screen === "build" && state.jumpTo) return;
+    window.scrollTo({ top: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.screen]);
+
   switch (state.screen) {
     case "school":
       return <SchoolScreen state={state} setState={setState} />;
@@ -1656,16 +1896,8 @@ function Index() {
       return <SizingChartScreen state={state} setState={setState} />;
     case "size-result":
       return <SizeResultScreen state={state} setState={setState} />;
-    case "build-sleeves":
-      return <BuildSleevesScreen state={state} setState={setState} />;
-    case "build-letter":
-      return <BuildLetterScreen state={state} setState={setState} />;
-    case "build-patches":
-      return <BuildPatchesScreen state={state} setState={setState} />;
-    case "build-mono":
-      return <BuildMonoScreen state={state} setState={setState} />;
-    case "build-placement":
-      return <BuildPlacementScreen state={state} setState={setState} />;
+    case "build":
+      return <BuilderScreen state={state} setState={setState} />;
     case "build-review":
       return <BuildReviewScreen state={state} setState={setState} />;
     case "checkout":
