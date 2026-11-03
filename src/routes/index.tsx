@@ -1138,7 +1138,7 @@ function BuilderScreen({ state, setState }: { state: OrderState; setState: SetOr
         if (el && el.getBoundingClientRect().top <= line) current = s.id;
       }
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
-        current = BUILD_SECTIONS[BUILD_SECTIONS.length - 1].id;
+        current = "summary";
       }
       setActive(current);
     };
