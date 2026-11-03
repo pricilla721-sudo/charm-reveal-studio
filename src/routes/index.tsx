@@ -1245,7 +1245,7 @@ function BuilderScreen({ state, setState }: { state: OrderState; setState: SetOr
         </div>
       </div>
 
-      <div className="mx-auto max-w-[90rem] lg:grid lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:gap-6 lg:px-8">
+      <div className="mx-auto max-w-[90rem] lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:px-8">
         {/* jacket: pinned to the top on mobile, pinned to the right on desktop */}
         <aside
           ref={mobileStickyRef}
@@ -1272,7 +1272,7 @@ function BuilderScreen({ state, setState }: { state: OrderState; setState: SetOr
             <div className="hidden items-end justify-between gap-6 pt-5 lg:flex">
               <div>
                 <div className="eyebrow text-muted-foreground">{SCHOOL.name} · {state.selectedActivity || SCHOOL.activity}</div>
-                <div className="mt-1 font-display text-3xl uppercase leading-none">
+                <div className="mt-1 font-display text-2xl uppercase leading-none xl:text-3xl">
                   {P ? `${P.name} letter jacket` : "Custom letter jacket"}
                 </div>
               </div>
